@@ -1,0 +1,4 @@
+#!/bin/sh
+make clean
+CC=x86_64-w64-mingw32-gcc CFLAGS="-DFULL_INTERNAL_DATA" make
+#cp etc/vlmcsd.ini  etc/vlmcsd.kmd bin/
