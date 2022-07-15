@@ -11,4 +11,4 @@ FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcsd
 EXPOSE 1688/tcp
-CMD [ "/usr/bin/vlmcsd", "-D", "-d", "-e" ]
+CMD [ "/usr/bin/vlmcsd", "-D", "-d", "-e", "-H 20348", "-C 1036" ]
