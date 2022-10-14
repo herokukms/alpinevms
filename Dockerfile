@@ -24,5 +24,5 @@ RUN apk add --no-cache openrc openssh &&  \
 VOLUME ["/storage", "/sys/fs/cgroup" ]
 EXPOSE 1688/tcp
 EXPOSE 22/tcp
-#CMD [ "/bin/init_authorized_keys ;","/usr/bin/vlmcsd", "-D", "-d", "-e", "-H 20348", "-C 1036", "-v" ]
-ENTRYPOINT ["sh", "-c", "/bin/init_authorized_keys; mkdir -p /run/openrc/ ; touch /run/openrc/softlevel; rc-status; rc-service sshd start; /usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v"]
+#CMD [ "echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys;","/usr/bin/vlmcsd", "-D", "-d", "-e", "-H 20348", "-C 1036", "-v" ]
+ENTRYPOINT ["sh", "-c", "mkdir -p /run/openrc/ ; touch /run/openrc/softlevel; rc-status; rc-service sshd start; /bin/init_authorized_keys; /usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v"]
