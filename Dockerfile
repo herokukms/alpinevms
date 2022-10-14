@@ -12,6 +12,7 @@ FROM alpine:latest
 COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcsd
 COPY --from=builder /root/alpinevms/init_authorized_keys /bin/
 WORKDIR /root/
+
 # supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
 RUN apk add --no-cache openrc openssh &&  \
     ssh-keygen -A \
