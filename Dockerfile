@@ -16,6 +16,7 @@ WORKDIR /root/
 RUN apk add --no-cache openrc openssh &&  \
     ssh-keygen -A \
     && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config && \
+    sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config && \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
     chmod u+x /bin/init_authorized_keys && \
@@ -23,6 +24,6 @@ RUN apk add --no-cache openrc openssh &&  \
 
 VOLUME ["/storage", "/sys/fs/cgroup" ]
 EXPOSE 1688/tcp
-EXPOSE 22/tcp
-#CMD [ "echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys;","/usr/bin/vlmcsd", "-D", "-d", "-e", "-H 20348", "-C 1036", "-v" ]
+EXPOSE 2222/tcp
+#CMD ["/bin/init_authorized_keys"]
 ENTRYPOINT ["sh", "-c", "mkdir -p /run/openrc/ ; touch /run/openrc/softlevel; rc-status; rc-service sshd start; /bin/init_authorized_keys; /usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v"]
