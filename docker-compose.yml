@@ -4,5 +4,6 @@ services:
   vlmcsd:
     build: .
     ports:
+      - "22:22"
       - "1688:1688"
     restart: always
