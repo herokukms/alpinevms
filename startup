@@ -7,4 +7,4 @@ mkdir -p /run/openrc/ 2>/dev/null
 touch /run/openrc/softlevel 2>/dev/null
 rc-status 2>/dev/null
 rc-service sshd start 2>/dev/null
-/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v 2>/dev/null
+/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v 2>/dev/null &
