@@ -5,9 +5,10 @@ WORKDIR /root
 RUN apk add --no-cache git make build-base && \
     git clone --branch main --single-branch https://github.com/herokukms/alpinevms.git && \
     cd alpinevms && \
+    mkdir -p bin && \
+    cat startup > /root/alpinevms/bin/startup && \
     pwd && ls -l && \ 
     VERBOSE=1 CC=gcc CFLAGS="-static -DFULL_INTERNAL_DATA" LDFLAGS="-static "  GETIFADDRS=musl DNS_PARSER=internal make && \
-    cat /root/alpinevms/startup > /root/alpinevms/bin/startup && \
     ls -l && pwd 
 
 FROM alpine:latest
