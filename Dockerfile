@@ -12,7 +12,7 @@ RUN apk add --no-cache git make build-base && \
 FROM alpine:latest
 COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcsd
 COPY --from=builder /root/alpinevms/bin/vlmcs /usr/bin/vlmcs
-COPY --from=builder /root/alpinevms/startup /usr/bin/startup
+COPY --from=builder alpinevms/startup /usr/bin/startup
 WORKDIR /root/
 
 # supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
