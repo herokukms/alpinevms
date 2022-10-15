@@ -11,7 +11,7 @@ RUN apk add --no-cache git make build-base && \
 FROM alpine:latest
 COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcsd
 COPY --from=builder /root/alpinevms/bin/vlmcs /usr/bin/vlmcs
-COPY --from=builder /root/alpinevms/src/startup /sbin/startup
+COPY --from=builder /root/alpinevms/bin/startup /usr/bin/startup
 WORKDIR /root/
 
 # supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
@@ -27,5 +27,5 @@ RUN apk add --no-cache openrc openssh &&  \
 VOLUME ["/storage", "/sys/fs/cgroup" ]
 EXPOSE 1688/tcp
 EXPOSE 2222/tcp
-CMD ["/sbin/startup"]
+CMD ["/usr/bin/startup"]
 #ENTRYPOINT ["sh", "-c", "mkdir -p /run/openrc/ ; touch /run/openrc/softlevel; rc-status; rc-service sshd start; /bin/startup; /usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v"]
