@@ -1,5 +1,0 @@
-#!/bin/sh
-echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
-echo "for managing the private corresponding to:"
-echo $SSH_MANAGEMENT_KEY
-chmod u+x /root/.ssh/authorized_keys
