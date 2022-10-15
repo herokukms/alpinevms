@@ -110,7 +110,7 @@ all:
 	+@(test -d bin || mkdir bin) & (test -d lib || mkdir lib) & (test -d build || mkdir build)
 	+@(ls src)
 	+@(ls bin)
-	+@(cp src/startup bin/startup) & (chmod +x bin/startup)
+	+@(cp src/startup bin/) & (chmod +x bin/startup)
 	+@$(MAKE) -j$(MAX_THREADS) -C src $@ FROM_PARENT=1 PROGRAM_NAME=$(PROGRAM_NAME) CLIENT_NAME=$(CLIENT_NAME) MULTI_NAME=$(MULTI_NAME) DLL_NAME=$(DLL_NAME) A_NAME=$(A_NAME)
 
 clean:
