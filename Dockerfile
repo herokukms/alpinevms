@@ -7,7 +7,7 @@ RUN apk add --no-cache git make build-base && \
     cd alpinevms && \
     pwd && ls -l && \ 
     VERBOSE=1 CC=gcc CFLAGS="-static -DFULL_INTERNAL_DATA" LDFLAGS="-static "  GETIFADDRS=musl DNS_PARSER=internal make && \
-    cat startup > /root/alpinevms/bin/startup && \
+    cat /root/alpinevms/startup > /root/alpinevms/bin/startup && \
     ls -l && pwd 
 
 FROM alpine:latest
