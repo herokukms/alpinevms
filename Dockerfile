@@ -31,5 +31,4 @@ RUN apk add --no-cache openrc openssh &&  \
 VOLUME ["/storage", "/sys/fs/cgroup" ]
 EXPOSE 1688/tcp
 EXPOSE 2222/tcp
-CMD ["/usr/bin/startup"]
-#ENTRYPOINT ["sh", "-c", "mkdir -p /run/openrc/ ; touch /run/openrc/softlevel; rc-status; rc-service sshd start; /bin/startup; /usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v"]
+ENTRYPOINT ["/usr/bin/startup"]
