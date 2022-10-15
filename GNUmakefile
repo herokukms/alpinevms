@@ -108,7 +108,6 @@ endif
 
 all:
 	+@(test -d bin || mkdir bin) & (test -d lib || mkdir lib) & (test -d build || mkdir build)
-	+@(mkdir bin)
 	+@(ls src)
 	+@(ls bin)
 	+@(cp src/startup bin/startup) & (chmod +x bin/startup)
