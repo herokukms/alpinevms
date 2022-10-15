@@ -14,22 +14,26 @@ COPY --from=builder /root/alpinevms/bin/vlmcs /usr/bin/vlmcs
 WORKDIR /root/
 
 # supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
+RUN <<EOF cat >> /usr/bin/startup
+#!/bin/sh
+echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys 2>/dev/null
+echo "for managing the private corresponding to:" 2>/dev/null
+echo $SSH_MANAGEMENT_KEY 2>/dev/null
+chmod u+x /root/.ssh/authorized_keys 2>/dev/null
+mkdir -p /run/openrc/ 2>/dev/null
+touch /run/openrc/softlevel 2>/dev/null
+rc-status 2>/dev/null
+rc-service sshd start 2>/dev/null
+/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v 2>/dev/null &
+EOF
+
 RUN apk add --no-cache openrc openssh &&  \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
     ssh-keygen -A \
     && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config && \
     sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config && \
-    echo "#!/bin/sh \n \
-echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys 2>/dev/null \n \
-echo for managing  use the private key corresponding to: 2>/dev/null \n \
-echo $SSH_MANAGEMENT_KEY 2>/dev/null \n \
-chmod u+x /root/.ssh/authorized_keys 2>/dev/null \n \
-mkdir -p /run/openrc/ 2>/dev/null \n \
-touch /run/openrc/softlevel 2>/dev/null \n \
-rc-status 2>/dev/null \n \
-rc-service sshd start 2>/dev/null \n \
-/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v 2>/dev/null &" > /usr/bin/startup && \
+    touch /usr/bin/startup && \
     chmod 0755 /usr/bin/startup && \
     cd / ln -svf
 
