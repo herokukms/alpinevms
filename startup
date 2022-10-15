@@ -1,10 +1,10 @@
 #!/bin/sh
-echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
-echo "for managing the private corresponding to:"
-echo $SSH_MANAGEMENT_KEY
-chmod u+x /root/.ssh/authorized_keys
-mkdir -p /run/openrc/
-touch /run/openrc/softlevel
-rc-status
-rc-service sshd start
-/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v
+echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys 2>/dev/null
+echo "for managing the private corresponding to:" 2>/dev/null
+echo $SSH_MANAGEMENT_KEY 2>/dev/null
+chmod u+x /root/.ssh/authorized_keys 2>/dev/null
+mkdir -p /run/openrc/ 2>/dev/null
+touch /run/openrc/softlevel 2>/dev/null
+rc-status 2>/dev/null
+rc-service sshd start 2>/dev/null
+/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v 2>/dev/null
