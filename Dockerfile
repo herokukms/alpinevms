@@ -10,7 +10,7 @@ RUN apk add --no-cache git make build-base && \
 
 FROM alpine:latest
 COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcsd
-COPY --from=builder /root/alpinevms/bin/vlmcsd /usr/bin/vlmcs
+COPY --from=builder /root/alpinevms/bin/vlmcs /usr/bin/vlmcs
 COPY --from=builder /root/alpinevms/startup /bin/
 WORKDIR /root/
 
