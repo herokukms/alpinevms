@@ -21,7 +21,7 @@ RUN apk add --no-cache openrc openssh &&  \
     sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config && \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
-    chmod u+x /sbin/startup && \
+    chmod u+x /usr/bin/startup && \
     cd / ln -svf
 
 VOLUME ["/storage", "/sys/fs/cgroup" ]
