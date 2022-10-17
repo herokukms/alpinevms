@@ -6,4 +6,4 @@ chmod u+x /root/.ssh/authorized_keys
 mkdir -p /run/openrc/
 touch /run/openrc/softlevel 
 /usr/sbin/sshd -D -p 2222 -d &
-/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v
+/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -X $MONGODB_API_URL -Y $MONGODB_API_KEY -v

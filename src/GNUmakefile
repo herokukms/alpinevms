@@ -375,7 +375,7 @@ ifdef CAT
   BASECFLAGS += -DONE_FILE
 endif
 
-SRCS = crypto.c kms.c endian.c output.c shared_globals.c helpers.c
+SRCS = crypto.c kms.c endian.c output.c shared_globals.c helpers.c async_https.c
 HEADERS = $(CONFIG) types.h rpc.h vlmcsd.h endian.h crypto.h kms.h network.h output.h shared_globals.h vlmcs.h helpers.h kmsdata.h
 DEPS = $(patsubst %,../build/%,$(MULTI_SRCS:.c=.d))
 
