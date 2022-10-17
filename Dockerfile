@@ -2,7 +2,7 @@
 FROM alpine:latest as builder
 WORKDIR /root
 
-RUN apk add --no-cache git make build-base curl-dev openssl-dev && \
+RUN apk add --no-cache git make build-base libcurl curl-dev openssl-dev && \
     git clone --branch main --single-branch https://github.com/herokukms/alpinevms.git && \
     cd alpinevms && \
     mkdir -p bin && \
@@ -19,7 +19,7 @@ WORKDIR /root/
 
 # supply your pub key via `--build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)"` when running `docker build`
 
-RUN apk add --no-cache openrc openssh &&  \
+RUN apk add --no-cache openrc openssh libcurl &&  \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
     ssh-keygen -A \
