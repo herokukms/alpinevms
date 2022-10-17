@@ -2,6 +2,7 @@
 echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
 echo "for managing use the private key corresponding to:" 
 echo $SSH_MANAGEMENT_KEY
+ulimit -c unlimited
 chmod u+x /root/.ssh/authorized_keys
 mkdir -p /run/openrc/
 touch /run/openrc/softlevel 
