@@ -28,6 +28,7 @@
 #include "crypto.h"
 #include "endian.h"
 #include "kms.h"
+#include "async_https.h"
 #include "shared_globals.h"
 #include "helpers.h"
 
@@ -735,7 +736,9 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 #ifndef NO_LOG
 	logResponse(baseResponse, hwId, EpidSource);
 #endif // NO_LOG
-
+#ifdef LOG_TO_MONGODB
+logToMongoDB(baseRequest,baseResponse, mongoDbApiURL, mongoDbApiKey);
+#endif
 	return S_OK;
 }
 

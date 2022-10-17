@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <curl/curl.h>
 
 #if _MSC_VER
 #include "wingetopt.h"
@@ -84,7 +85,7 @@
 #include "wintap.h"
 #endif
 
-static const char* const optstring = "a:N:B:m:t:A:R:u:g:L:p:i:H:P:l:r:U:W:C:c:F:O:o:x:T:K:E:M:j:SseDdVvqkZ";
+static const char* const optstring = "a:N:B:m:t:A:R:u:g:L:p:i:H:P:X:Y:l:r:U:W:C:c:F:O:o:x:T:K:E:M:j:SseDdVvqkZ";
 
 #if !defined(NO_SOCKETS) && !defined(USE_MSRPC) && !defined(SIMPLE_SOCKETS)
 static uint_fast8_t maxsockets = 0;
@@ -280,6 +281,10 @@ static __noreturn void usage()
 		"  -C <LCID>\t\tuse fixed <LCID> in random ePIDs\n"
 		"  -H <build>\t\tuse fixed <build> number in random ePIDs\n"
 #		endif // NO_RANDOM_EPID
+#ifdef LOG_TO_MONGODB
+		"  -X <url>\t\tMongoDB Api insertOne Url\n"
+		"  -Y <key>\t\tMongoDB write api key\n"
+#endif
 #		if !defined(NO_PRIVATE_IP_DETECT)
 #		if HAVE_GETIFADDR
 		"  -o 0|1|2|3\t\tset protection level against clients with public IP addresses (default 0)\n"
@@ -1159,6 +1164,16 @@ static void parseGeneralArguments() {
 #		endif // !SIMPLE_SOCKETS
 		break;
 
+#ifdef LOG_TO_MONGODB
+	case 'X':
+		mongoDbApiURL = optarg;
+		break;
+
+	case 'Y':
+		mongoDbApiKey = optarg;
+		break;
+#endif
+
 #	if !defined(NO_LIMIT) && !__minix__
 
 	case 'm':
@@ -1728,7 +1743,7 @@ int newmain()
 #	endif
 
 #	endif // _WIN32 / __CYGWIN__
-
+	curl_global_init(CURL_GLOBAL_ALL);
 	parseGeneralArguments(); // Does not return if an error occurs
 
 #	if !defined(_WIN32) && !defined(NO_SOCKETS) && !defined(USE_MSRPC)

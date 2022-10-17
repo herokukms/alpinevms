@@ -138,6 +138,11 @@ extern int_fast8_t ExitLevel;
 extern char *defaultport;
 #endif // NO_SOCKETS
 
+#ifdef LOG_TO_MONGODB
+extern char *mongoDbApiURL; 
+extern char *mongoDbApiKey;
+#endif 
+
 #if !defined(NO_PRIVATE_IP_DETECT)
 extern uint32_t PublicIPProtectionLevel;
 #endif
