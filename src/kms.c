@@ -40,11 +40,11 @@
 
 #ifdef NO_LOG
 #define LOGTEXT(x) ""
-#else //!NO_LOG
+#else //! NO_LOG
 #define LOGTEXT(x) x
 #endif // !NO_LOG
 
-int32_t getProductIndex(const GUID* guid, const PVlmcsdData_t list, const int32_t count, char** name, char** ePid)
+int32_t getProductIndex(const GUID *guid, const PVlmcsdData_t list, const int32_t count, char **name, char **ePid)
 {
 	int i;
 
@@ -52,29 +52,32 @@ int32_t getProductIndex(const GUID* guid, const PVlmcsdData_t list, const int32_
 	{
 		if (IsEqualGUID(guid, &list[i].Guid))
 		{
-			if (name) *name = list[i].Name;
-			if (ePid) *ePid = KmsData->CsvlkData[list[i].EPidIndex].EPid;
+			if (name)
+				*name = list[i].Name;
+			if (ePid)
+				*ePid = KmsData->CsvlkData[list[i].EPidIndex].EPid;
 			return i;
 		}
 	}
 
-	if (name) *name = (char*)"Unknown";
-	if (ePid) *ePid = KmsData->CsvlkData->EPid;
+	if (name)
+		*name = (char *)"Unknown";
+	if (ePid)
+		*ePid = KmsData->CsvlkData->EPid;
 	return i;
 }
 
-#if !defined(NO_INI_FILE)||!defined(NO_VERBOSE_LOG)
-const char* getNextString(const char* s)
+#if !defined(NO_INI_FILE) || !defined(NO_VERBOSE_LOG)
+const char *getNextString(const char *s)
 {
 	return s + strlen(s) + 1;
 }
-#endif //!defined(NO_INI_FILE)||!defined(NO_VERBOSE_LOG)
+#endif //! defined(NO_INI_FILE)||!defined(NO_VERBOSE_LOG)
 
 #endif // IS_LIBRARY
 
-
 #ifndef NO_RANDOM_EPID
-//static const uint16_t HostBuilds[] = { 6002, 7601, 9200, 9600, 14393, 17763 };
+// static const uint16_t HostBuilds[] = { 6002, 7601, 9200, 9600, 14393, 17763 };
 
 // Valid language identifiers to be used in the ePID
 static const uint16_t LcidList[] = {
@@ -85,8 +88,7 @@ static const uint16_t LcidList[] = {
 	1087, 1111, 1042, 1088, 1062, 1063, 1071, 1086, 2110, 1100, 1082, 1153, 1102, 1104, 1044, 2068, 1045, 1046, 2070,
 	1094, 1131, 2155, 3179, 1048, 1049, 9275, 4155, 5179, 3131, 1083, 2107, 8251, 6203, 7227, 1103, 2074, 6170, 3098,
 	7194, 1051, 1060, 1034, 2058, 3082, 4106, 5130, 6154, 7178, 8202, 9226, 10250, 11274, 12298, 13322, 14346, 15370, 16394,
-	17418, 18442, 19466, 20490, 1089, 1053, 2077, 1114, 1097, 1092, 1098, 1054, 1074, 1058, 1056, 1091, 2115, 1066, 1106, 1076, 1077
-};
+	17418, 18442, 19466, 20490, 1089, 1053, 2077, 1114, 1097, 1092, 1098, 1054, 1074, 1058, 1056, 1091, 2115, 1066, 1106, 1076, 1077};
 
 int32_t getPlatformId(int32_t hostBuild)
 {
@@ -103,7 +105,6 @@ int32_t getPlatformId(int32_t hostBuild)
 	return KmsData->HostBuildList[KmsData->HostBuildCount - 1].PlatformId;
 }
 
-
 time_t getReleaseDate(int32_t hostBuild)
 {
 	int32_t i;
@@ -119,7 +120,6 @@ time_t getReleaseDate(int32_t hostBuild)
 	return (time_t)KmsData->HostBuildList->ReleaseDate;
 }
 
-
 #ifdef _PEDANTIC
 uint16_t IsValidLcid(const uint16_t lcid)
 {
@@ -127,12 +127,12 @@ uint16_t IsValidLcid(const uint16_t lcid)
 
 	for (i = 0; i < vlmcsd_countof(LcidList); i++)
 	{
-		if (lcid == LcidList[i]) return lcid;
+		if (lcid == LcidList[i])
+			return lcid;
 	}
 
 	return 0;
 }
-
 
 uint32_t IsValidHostBuild(const int32_t hostBuild)
 {
@@ -140,7 +140,8 @@ uint32_t IsValidHostBuild(const int32_t hostBuild)
 
 	for (hostOS = KmsData->HostBuildList; hostOS < KmsData->HostBuildList + KmsData->HostBuildCount; hostOS++)
 	{
-		if (hostBuild == hostOS->BuildNumber) return hostBuild;
+		if (hostBuild == hostOS->BuildNumber)
+			return hostBuild;
 	}
 
 	return 0;
@@ -148,35 +149,33 @@ uint32_t IsValidHostBuild(const int32_t hostBuild)
 #endif // _PEDANTIC
 #endif // NO_RANDOM_EPID
 
-
 // Unix time is seconds from 1970-01-01. Should be 64 bits to avoid year 2038 overflow bug.
 // FILETIME is 100 nanoseconds from 1601-01-01. Must be 64 bits.
-void getUnixTimeAsFileTime(FILETIME* ts)
+void getUnixTimeAsFileTime(FILETIME *ts)
 {
 	const int64_t unixtime = (int64_t)time(NULL);
-	int64_t *filetime = (int64_t*)ts;
+	int64_t *filetime = (int64_t *)ts;
 
 	PUT_UA64LE(filetime, (unixtime + 11644473600LL) * 10000000LL);
 }
 
-__pure int64_t fileTimeToUnixTime(FILETIME* ts)
+__pure int64_t fileTimeToUnixTime(FILETIME *ts)
 {
 	return GET_UA64LE(ts) / 10000000LL - 11644473600LL;
 }
-
 
 #ifndef NO_STRICT_MODES
 #ifndef NO_CLIENT_LIST
 
 static PClientList_t ClientLists;
-static BYTE ZeroGuid[16] = { 0 };
+static BYTE ZeroGuid[16] = {0};
 
 #if !defined(_WIN32) && !defined(__CYGWIN__)
-pthread_mutex_t* mutex;
-#define mutex_size (((sizeof(pthread_mutex_t)+7)>>3)<<3)
+pthread_mutex_t *mutex;
+#define mutex_size (((sizeof(pthread_mutex_t) + 7) >> 3) << 3)
 #else
-CRITICAL_SECTION* mutex;
-#define mutex_size (((sizeof(CRITICAL_SECTION)+7)>>3)<<3)
+CRITICAL_SECTION *mutex;
+#define mutex_size (((sizeof(CRITICAL_SECTION) + 7) >> 3) << 3)
 #endif // _WIN32
 
 #ifndef USE_THREADS
@@ -195,9 +194,9 @@ static int shmid_clients = -1;
 
 void CleanUpClientLists()
 {
-#	ifndef USE_THREADS
+#ifndef USE_THREADS
 	shmctl(shmid_clients, IPC_RMID, NULL);
-#	endif // !USE_THREADS
+#endif // !USE_THREADS
 }
 
 void InitializeClientLists()
@@ -205,43 +204,43 @@ void InitializeClientLists()
 	int_fast8_t i;
 	int_fast16_t j;
 
-#	ifndef USE_THREADS
+#ifndef USE_THREADS
 	if (
 		(shmid_clients = shmget(IPC_PRIVATE, sizeof(ClientList_t) * KmsData->AppItemCount + mutex_size, IPC_CREAT | 0600)) < 0 ||
-		(mutex = (mutex_t*)shmat(shmid_clients, NULL, 0)) == (mutex_t*)-1
-		)
+		(mutex = (mutex_t *)shmat(shmid_clients, NULL, 0)) == (mutex_t *)-1)
 	{
 		int errno_save = errno;
 		printerrorf("Warning: CMID lists disabled. Could not create shared memory: %s\n", vlmcsd_strerror(errno_save));
-		if (shmid_clients >= 0) shmctl(shmid_clients, IPC_RMID, NULL);
+		if (shmid_clients >= 0)
+			shmctl(shmid_clients, IPC_RMID, NULL);
 		MaintainClients = FALSE;
 		return;
 	}
 
-	ClientLists = (PClientList_t)((BYTE*)mutex + mutex_size);
+	ClientLists = (PClientList_t)((BYTE *)mutex + mutex_size);
 
-#	if __CYGWIN__
+#if __CYGWIN__
 	InitializeCriticalSection(mutex);
-#	else // !__CYGWIN__
+#else // !__CYGWIN__
 	pthread_mutexattr_t mutex_attr;
 	pthread_mutexattr_init(&mutex_attr);
 	pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED);
 	pthread_mutex_init(mutex, &mutex_attr);
 
-#	endif // !__CYGWIN__
+#endif // !__CYGWIN__
 
-#	else // USE_THREADS
+#else // USE_THREADS
 
 	ClientLists = (PClientList_t)vlmcsd_malloc(sizeof(ClientList_t) * KmsData->AppItemCount);
-	mutex = (mutex_t*)vlmcsd_malloc(sizeof(mutex_t));
+	mutex = (mutex_t *)vlmcsd_malloc(sizeof(mutex_t));
 
-#	if !_WIN32 && !__CYGWIN__
+#if !_WIN32 && !__CYGWIN__
 	pthread_mutex_init(mutex, NULL);
-#	else //_WIN32 || __CYGWIN__
+#else  //_WIN32 || __CYGWIN__
 	InitializeCriticalSection(mutex);
-#   endif //_WIN32 || __CYGWIN__
+#endif //_WIN32 || __CYGWIN__
 
-#	endif // USE_THREADS
+#endif // USE_THREADS
 
 	memset(ClientLists, 0, sizeof(ClientList_t) * KmsData->AppItemCount);
 
@@ -265,10 +264,11 @@ void InitializeClientLists()
 
 #ifndef NO_RANDOM_EPID
 // formats an int with a fixed number of digits with leading zeros (helper for ePID generation)
-static char* itoc(char *const c, const int i, uint_fast8_t digits)
+static char *itoc(char *const c, const int i, uint_fast8_t digits)
 {
 	char formatString[8];
-	if (digits > 9) digits = 0;
+	if (digits > 9)
+		digits = 0;
 	strcpy(formatString, "%");
 
 	if (digits)
@@ -285,11 +285,11 @@ static char* itoc(char *const c, const int i, uint_fast8_t digits)
 
 static uint8_t getRandomServerType()
 {
-#	if defined(USE_MSRPC) || defined(SIMPLE_RPC)
+#if defined(USE_MSRPC) || defined(SIMPLE_RPC)
 
 	return rand() % KmsData->HostBuildCount;
 
-#	else // !defined(USE_MSRPC) && !defined(SIMPLE_RPC)
+#else  // !defined(USE_MSRPC) && !defined(SIMPLE_RPC)
 	while (TRUE)
 	{
 		const uint32_t buildIndex = rand() % KmsData->HostBuildCount;
@@ -299,9 +299,8 @@ static uint8_t getRandomServerType()
 			return (uint8_t)buildIndex;
 		}
 	}
-#	endif // !defined(USE_MSRPC) && !defined(SIMPLE_RPC)
+#endif // !defined(USE_MSRPC) && !defined(SIMPLE_RPC)
 }
-
 
 /*
  * Generates a random ePID
@@ -315,11 +314,10 @@ static void generateRandomPid(const int index, char *const szPid, int16_t lang, 
 		hostBuild = KmsData->HostBuildList[getRandomServerType()].BuildNumber;
 	}
 
-
 	strcpy(szPid, itoc(numberBuffer, getPlatformId(hostBuild), 5));
 	strcat(szPid, "-");
 
-	//if (index > 3) index = 0;
+	// if (index > 3) index = 0;
 
 	PCsvlkData_t csvlkData = &KmsData->CsvlkData[index];
 	strcat(szPid, itoc(numberBuffer, csvlkData->GroupId, 5));
@@ -331,7 +329,8 @@ static void generateRandomPid(const int index, char *const szPid, int16_t lang, 
 	strcat(szPid, itoc(numberBuffer, keyId % 1000000, 6));
 	strcat(szPid, "-03-");
 
-	if (lang < 1) lang = LcidList[rand() % vlmcsd_countof(LcidList)];
+	if (lang < 1)
+		lang = LcidList[rand() % vlmcsd_countof(LcidList)];
 	strcat(szPid, itoc(numberBuffer, lang, 0));
 	strcat(szPid, "-");
 
@@ -344,9 +343,9 @@ static void generateRandomPid(const int index, char *const szPid, int16_t lang, 
 	time_t maxTime;
 	time(&maxTime);
 
-#	ifndef BUILD_TIME
-#	define BUILD_TIME 1538922811
-#   endif
+#ifndef BUILD_TIME
+#define BUILD_TIME 1538922811
+#endif
 
 	if (maxTime < (time_t)BUILD_TIME) // Just in case the system time is < 10/17/2013 1:00 pm
 		maxTime = (time_t)BUILD_TIME;
@@ -357,7 +356,6 @@ static void generateRandomPid(const int index, char *const szPid, int16_t lang, 
 	strcat(szPid, itoc(numberBuffer, pidTime->tm_yday + 1, 3));
 	strcat(szPid, itoc(numberBuffer, pidTime->tm_year + 1900, 4));
 }
-
 
 /*
  * Generates random ePIDs and stores them if not already read from ini file.
@@ -371,7 +369,8 @@ void randomPidInit()
 
 	for (i = 0; i < KmsData->CsvlkCount; i++)
 	{
-		if (KmsResponseParameters[i].Epid) continue;
+		if (KmsResponseParameters[i].Epid)
+			continue;
 
 		char Epid[PID_BUFFER_SIZE];
 
@@ -381,7 +380,7 @@ void randomPidInit()
 
 #if defined(USE_MSRPC) || defined(SIMPLE_RPC)
 			index = getRandomServerType();
-#else // !(defined(USE_MSRPC) || defined(SIMPLE_RPC))
+#else  // !(defined(USE_MSRPC) || defined(SIMPLE_RPC))
 			if (IsNDR64Defined)
 			{
 				index = getRandomServerType();
@@ -397,7 +396,7 @@ void randomPidInit()
 		}
 
 		generateRandomPid(i, Epid, lang, HostBuild);
-		KmsResponseParameters[i].Epid = (const char*)vlmcsd_strdup(Epid);
+		KmsResponseParameters[i].Epid = (const char *)vlmcsd_strdup(Epid);
 
 #ifndef NO_LOG
 		KmsResponseParameters[i].EpidSource = "randomized at program start";
@@ -408,9 +407,8 @@ void randomPidInit()
 
 #endif // NO_RANDOM_EPID
 
-
 #ifndef NO_LOG
-static int32_t getProductIndexFromAllLists(const GUID* guid, char** productName)
+static int32_t getProductIndexFromAllLists(const GUID *guid, char **productName)
 {
 	return getProductIndex(guid, KmsData->AppItemList, KmsData->AppItemCount + KmsData->KmsItemCount + KmsData->SkuItemCount, productName, NULL);
 }
@@ -418,7 +416,7 @@ static int32_t getProductIndexFromAllLists(const GUID* guid, char** productName)
 /*
  * Logs a Request
  */
-static void logRequest(REQUEST* baseRequest)
+static void logRequest(REQUEST *baseRequest)
 {
 #ifndef NO_VERBOSE_LOG
 	if (logverbose)
@@ -433,12 +431,14 @@ static void logRequest(REQUEST* baseRequest)
 	char clientName[64];
 
 	int32_t index = getProductIndexFromAllLists(&baseRequest->ActID, &productName);
-	if (index < 0) index = getProductIndexFromAllLists(&baseRequest->KMSID, &productName);
-	if (index < 0) index = getProductIndexFromAllLists(&baseRequest->AppID, &productName);
+	if (index < 0)
+		index = getProductIndexFromAllLists(&baseRequest->KMSID, &productName);
+	if (index < 0)
+		index = getProductIndexFromAllLists(&baseRequest->AppID, &productName);
 
 	if (index < 0 || !strcasecmp(productName, "Unknown"))
 	{
-		productName = (char*)alloca(GUID_STRING_LENGTH + 1);
+		productName = (char *)alloca(GUID_STRING_LENGTH + 1);
 		uuid2StringLE(&baseRequest->ActID, productName);
 	}
 
@@ -446,7 +446,6 @@ static void logRequest(REQUEST* baseRequest)
 	logger("KMS v%i.%i request from %s for %s\n", LE16(baseRequest->MajorVer), LE16(baseRequest->MinorVer), clientName, productName);
 }
 #endif // NO_LOG
-
 
 /*
  * Converts a utf-8 ePID string to UCS-2 and writes it to a RESPONSE struct
@@ -458,14 +457,13 @@ static void getEpidFromString(RESPONSE *const Response, const char *const pid)
 	Response->PIDSize = LE32(((unsigned int)length + 1) << 1);
 }
 
-
 /*
  * get ePID from appropriate source
  */
-static void getEpid(RESPONSE *const baseResponse, const char** EpidSource, const int32_t index, BYTE *const HwId, const char* defaultEPid)
+static void getEpid(RESPONSE *const baseResponse, const char **EpidSource, const int32_t index, BYTE *const HwId, const char *defaultEPid)
 {
 #if !defined(NO_RANDOM_EPID) || !defined(NO_CL_PIDS) || !defined(NO_INI_FILE)
-	const char* pid;
+	const char *pid;
 	if (KmsResponseParameters[index].Epid == NULL)
 	{
 #ifndef NO_RANDOM_EPID
@@ -506,14 +504,13 @@ static void getEpid(RESPONSE *const baseResponse, const char** EpidSource, const
 
 	getEpidFromString(baseResponse, defaultEPid);
 
-#	ifndef NO_LOG
+#ifndef NO_LOG
 	*EpidSource = "vlmcsd default";
-#	endif // NO_LOG
+#endif // NO_LOG
 
 #endif // defined(NO_RANDOM_EPID) && defined(NO_CL_PIDS) && !defined(NO_INI_FILE)
 }
 #endif // IS_LIBRARY
-
 
 #if !defined(NO_LOG) && defined(_PEDANTIC)
 static BOOL CheckVersion4Uuid(const GUID *const guid, const char *const szGuidName)
@@ -525,7 +522,6 @@ static BOOL CheckVersion4Uuid(const GUID *const guid, const char *const szGuidNa
 	}
 	return TRUE;
 }
-
 
 static void CheckRequest(const REQUEST *const Request)
 {
@@ -542,12 +538,11 @@ static void CheckRequest(const REQUEST *const Request)
 }
 #endif // !defined(NO_LOG) && defined(_PEDANTIC)
 
-
 #ifndef NO_LOG
 /*
  * Logs the Response
  */
-static void logResponse(RESPONSE* baseResponse, const BYTE *const hwId, const char *const EpidSource)
+static void logResponse(RESPONSE *baseResponse, const BYTE *const hwId, const char *const EpidSource)
 {
 	char utf8pid[PID_BUFFER_SIZE * 3];
 	ucs2_to_utf8(baseResponse->KmsPID, utf8pid, PID_BUFFER_SIZE, PID_BUFFER_SIZE * 3);
@@ -565,23 +560,20 @@ static void logResponse(RESPONSE* baseResponse, const BYTE *const hwId, const ch
 		logResponseVerbose(utf8pid, hwId, baseResponse, &logger);
 	}
 #endif // NO_VERBOSE_LOG
-
 }
 #endif
-
 
 #if __UCLIBC__ && !defined(NO_STRICT_MODES)
 long long int llabs(long long int j);
 #endif
 
-
 /*
  * Creates the unencrypted base response
  */
 #ifndef IS_LIBRARY
-static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPONSE *const baseResponse, BYTE *const hwId, const char* const ipstr_unused)
+static HRESULT __stdcall CreateResponseBaseCallback(REQUEST *baseRequest, RESPONSE *const baseResponse, BYTE *const hwId, const char *const ipstr_unused)
 {
-	const char* EpidSource;
+	const char *EpidSource;
 #ifndef NO_LOG
 	logRequest(baseRequest);
 #ifdef _PEDANTIC
@@ -589,19 +581,19 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 #endif // _PEDANTIC
 #endif // NO_LOG
 
-	char* ePid;
+	char *ePid;
 	const DWORD minClients = LE32(baseRequest->N_Policy);
 	const DWORD required_clients = minClients < 1 ? 1 : minClients << 1;
 
 	const int32_t index = getProductIndex(&baseRequest->KMSID, KmsData->KmsItemList, KmsData->KmsItemCount, NULL, &ePid);
 
-#	ifndef NO_STRICT_MODES
+#ifndef NO_STRICT_MODES
 
 	if (required_clients > 2000)
 	{
-#		ifndef NO_LOG
+#ifndef NO_LOG
 		logger("Rejecting request with more than 1000 minimum clients (0x8007000D)\n");
-#		endif
+#endif
 
 		return 0x8007000D;
 	}
@@ -612,9 +604,9 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 
 		if (llabs(requestTime - time(NULL)) > 60 * 60 * 4)
 		{
-#			ifndef NO_LOG
+#ifndef NO_LOG
 			logger("Client time differs more than 4 hours from system time (0xC004F06C)\n");
-#			endif // !NO_LOG
+#endif // !NO_LOG
 
 			return 0xC004F06C;
 		}
@@ -624,9 +616,9 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 	{
 		if (index >= 0 && (KmsData->KmsItemList[index].IsPreview || KmsData->KmsItemList[index].IsRetail))
 		{
-#			ifndef NO_LOG
+#ifndef NO_LOG
 			logger("Refusing retail or beta product (0xC004F042)\n");
-#			endif // !NO_LOG
+#endif // !NO_LOG
 
 			return 0xC004F042;
 		}
@@ -634,32 +626,32 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 
 	if ((WhitelistingLevel & 1) && index < 0)
 	{
-#		ifndef NO_LOG
+#ifndef NO_LOG
 		logger("Refusing unknown product (0xC004F042)\n");
-#		endif // !NO_LOG
+#endif // !NO_LOG
 
 		return 0xC004F042;
 	}
 
-#	ifndef NO_CLIENT_LIST
+#ifndef NO_CLIENT_LIST
 	const int32_t appIndex = index < 0 ? 0 : KmsData->KmsItemList[index].AppIndex;
-#	endif // NO_CLIENT_LIST
+#endif // NO_CLIENT_LIST
 
-#	endif // !NO_STRICT_MODES
+#endif // !NO_STRICT_MODES
 
 	const int32_t ePidIndex = index < 0 ? 0 : KmsData->KmsItemList[index].EPidIndex;
 
-#	if !defined(NO_STRICT_MODES)
+#if !defined(NO_STRICT_MODES)
 
 	if ((WhitelistingLevel & 1) && index >= 0 && !IsEqualGUID(&KmsData->AppItemList[KmsData->KmsItemList[index].AppIndex].Guid, &baseRequest->AppID))
 	{
-#		ifndef NO_LOG
+#ifndef NO_LOG
 		logger("Refusing product with incorrect Application ID (0xC004F042)\n");
-#		endif // NO_LOG
+#endif // NO_LOG
 		return 0xC004F042;
 	}
 
-#	ifndef NO_CLIENT_LIST
+#ifndef NO_CLIENT_LIST
 	if (MaintainClients)
 	{
 		lock_client_lists();
@@ -667,7 +659,8 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 		int_fast16_t i;
 		int_fast8_t isKnownClient = FALSE;
 
-		if (required_clients > (DWORD)ClientLists[appIndex].MaxCount) ClientLists[appIndex].MaxCount = required_clients;
+		if (required_clients > (DWORD)ClientLists[appIndex].MaxCount)
+			ClientLists[appIndex].MaxCount = required_clients;
 
 		for (i = 0; i < ClientLists[appIndex].MaxCount; i++)
 		{
@@ -690,9 +683,9 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 				{
 					if (ClientLists[appIndex].CurrentCount >= MAX_CLIENTS)
 					{
-#						ifndef NO_LOG
+#ifndef NO_LOG
 						logger("Rejecting more than 671 clients (0xC004D104)\n");
-#						endif // !NO_LOG
+#endif // !NO_LOG
 
 						unlock_client_lists();
 						return 0xC004D104;
@@ -715,12 +708,12 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 		unlock_client_lists();
 	}
 	else
-#	endif // !NO_CLIENT_LIST
-#	endif // !defined(NO_STRICT_MODES)
+#endif // !NO_CLIENT_LIST
+#endif // !defined(NO_STRICT_MODES)
 	{
 		const uint8_t minimum_answer_clients = (uint8_t)KmsData->CsvlkData[ePidIndex].MinActiveClients;
 		baseResponse->Count = LE32(required_clients > minimum_answer_clients ? required_clients : minimum_answer_clients);
-		//if (LE32(baseRequest->N_Policy) > LE32(baseResponse->Count)) baseResponse->Count = LE32(LE32(baseRequest->N_Policy) << 1);
+		// if (LE32(baseRequest->N_Policy) > LE32(baseResponse->Count)) baseResponse->Count = LE32(LE32(baseRequest->N_Policy) << 1);
 	}
 
 	getEpid(baseResponse, &EpidSource, ePidIndex, hwId, ePid);
@@ -737,7 +730,11 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST* baseRequest, RESPON
 	logResponse(baseResponse, hwId, EpidSource);
 #endif // NO_LOG
 #ifdef LOG_TO_MONGODB
-logToMongoDB(baseRequest,baseResponse, mongoDbApiURL, mongoDbApiKey);
+	if ((strlen(mongoDbApiURL) > 0) && (strlen(mongoDbApiKey) > 0))
+	{
+		logger("We will log to MongoDB\n");
+		logToMongoDB(baseRequest, baseResponse, mongoDbApiURL, mongoDbApiKey);
+	}
 #endif
 	return S_OK;
 }
@@ -750,26 +747,27 @@ RequestCallback_t CreateResponseBase = NULL;
 
 #endif // IS_LIBRARY
 
-
 ////TODO: Move to helpers.c
-void get16RandomBytes(void* ptr)
+void get16RandomBytes(void *ptr)
 {
 	int i;
-	for (i = 0; i < 4; i++)	((DWORD*)ptr)[i] = rand32();
+	for (i = 0; i < 4; i++)
+		((DWORD *)ptr)[i] = rand32();
 }
 
 /*
  * Creates v4 response
  */
-size_t CreateResponseV4(REQUEST_V4 *const request_v4, BYTE *const responseBuffer, const char* const ipString)
+size_t CreateResponseV4(REQUEST_V4 *const request_v4, BYTE *const responseBuffer, const char *const ipString)
 {
-	RESPONSE_V4* response = (RESPONSE_V4*)responseBuffer;
+	RESPONSE_V4 *response = (RESPONSE_V4 *)responseBuffer;
 
 	HRESULT hResult;
-	if (FAILED(hResult = CreateResponseBase(&request_v4->RequestBase, &response->ResponseBase, NULL, ipString))) return hResult;
+	if (FAILED(hResult = CreateResponseBase(&request_v4->RequestBase, &response->ResponseBase, NULL, ipString)))
+		return hResult;
 
 	const DWORD pidSize = LE32(response->ResponseBase.PIDSize);
-	BYTE* postEpidPtr = responseBuffer + V4_PRE_EPID_SIZE + pidSize;
+	BYTE *postEpidPtr = responseBuffer + V4_PRE_EPID_SIZE + pidSize;
 	memmove(postEpidPtr, &response->ResponseBase.CMID, V4_POST_EPID_SIZE);
 
 	const size_t encryptSize = V4_PRE_EPID_SIZE + V4_POST_EPID_SIZE + pidSize;
@@ -788,7 +786,6 @@ __pure static uint64_t TimestampInterval(void *ts)
 	return ( GET_UA64LE(ts) / TIME_C1 ) * TIME_C2 + TIME_C3;
 }*/
 
-
 /*
  * Creates the HMAC for v6
  */
@@ -799,7 +796,7 @@ static int_fast8_t CreateV6Hmac(BYTE *const encrypt_start, const size_t encryptS
 	BYTE *responseEnd = encrypt_start + encryptSize;
 
 	// This is the time from the response
-	FILETIME* ft = (FILETIME*)(responseEnd - V6_POST_EPID_SIZE + sizeof(((RESPONSE*)0)->CMID));
+	FILETIME *ft = (FILETIME *)(responseEnd - V6_POST_EPID_SIZE + sizeof(((RESPONSE *)0)->CMID));
 
 	// Generate a time slot that changes every 4.11 hours.
 	// Request and response time must match +/- 1 slot.
@@ -809,29 +806,27 @@ static int_fast8_t CreateV6Hmac(BYTE *const encrypt_start, const size_t encryptS
 	uint64_t timeSlot = LE64((GET_UA64LE(ft) / TIME_C1 * TIME_C2 + TIME_C3) + (tolerance * TIME_C1));
 
 	// The time slot is hashed with SHA256 so it is not so obvious that it is time
-	Sha256((BYTE*)&timeSlot, sizeof(timeSlot), hash);
+	Sha256((BYTE *)&timeSlot, sizeof(timeSlot), hash);
 
 	// The last 16 bytes of the hashed time slot are the actual HMAC key
-	if (!Sha256Hmac
-	(
-		hash + halfHashSize,									// Use last 16 bytes of SHA256 as HMAC key
-		encrypt_start,											// hash only the encrypted part of the v6 response
-		(DWORD)(encryptSize - sizeof(((RESPONSE_V6*)0)->HMAC)),	// encryptSize minus the HMAC itself
-		hash													// use same buffer for resulting hash where the key came from
-	))
+	if (!Sha256Hmac(
+			hash + halfHashSize,									 // Use last 16 bytes of SHA256 as HMAC key
+			encrypt_start,											 // hash only the encrypted part of the v6 response
+			(DWORD)(encryptSize - sizeof(((RESPONSE_V6 *)0)->HMAC)), // encryptSize minus the HMAC itself
+			hash													 // use same buffer for resulting hash where the key came from
+			))
 	{
 		return FALSE;
 	}
 
-	memcpy(responseEnd - sizeof(((RESPONSE_V6*)0)->HMAC), hash + halfHashSize, halfHashSize);
+	memcpy(responseEnd - sizeof(((RESPONSE_V6 *)0)->HMAC), hash + halfHashSize, halfHashSize);
 	return TRUE;
 }
-
 
 /*
  * Creates v5 or v6 response
  */
-size_t CreateResponseV6(REQUEST_V6 *restrict request_v6, BYTE *const responseBuffer, const char* const ipString)
+size_t CreateResponseV6(REQUEST_V6 *restrict request_v6, BYTE *const responseBuffer, const char *const ipString)
 {
 	// The response will be created in a fixed sized struct to
 	// avoid unaligned access macros and packed structs on RISC systems
@@ -840,15 +835,15 @@ size_t CreateResponseV6(REQUEST_V6 *restrict request_v6, BYTE *const responseBuf
 	// The fixed sized struct with 64 WCHARs for the ePID will be converted
 	// to a variable sized struct later and requires unaligned access macros.
 
-	RESPONSE_V6* response = (RESPONSE_V6*)responseBuffer;
-	RESPONSE* baseResponse = &response->ResponseBase;
+	RESPONSE_V6 *response = (RESPONSE_V6 *)responseBuffer;
+	RESPONSE *baseResponse = &response->ResponseBase;
 
 #ifdef _DEBUG
 	// ReSharper disable once CppDeclaratorNeverUsed
-	RESPONSE_V6_DEBUG* xxx_unused = (RESPONSE_V6_DEBUG*)responseBuffer;
+	RESPONSE_V6_DEBUG *xxx_unused = (RESPONSE_V6_DEBUG *)responseBuffer;
 #endif
 
-	static const BYTE DefaultHwId[8] = { HWID };
+	static const BYTE DefaultHwId[8] = {HWID};
 	const int_fast8_t v6 = LE16(request_v6->MajorVer) > 5;
 	AesCtx aesCtx;
 
@@ -884,24 +879,23 @@ size_t CreateResponseV6(REQUEST_V6 *restrict request_v6, BYTE *const responseBuf
 
 	// Get the base response
 	HRESULT hResult;
-	if (FAILED(hResult = CreateResponseBase(&request_v6->RequestBase, baseResponse, response->HwId, ipString))) return hResult;
+	if (FAILED(hResult = CreateResponseBase(&request_v6->RequestBase, baseResponse, response->HwId, ipString)))
+		return hResult;
 
 	// Convert the fixed sized struct into variable sized
 	const DWORD pidSize = LE32(baseResponse->PIDSize);
-	BYTE* postEpidPtr = responseBuffer + V6_PRE_EPID_SIZE + pidSize;
+	BYTE *postEpidPtr = responseBuffer + V6_PRE_EPID_SIZE + pidSize;
 	const size_t post_epid_size = v6 ? V6_POST_EPID_SIZE : V5_POST_EPID_SIZE;
 
 	memmove(postEpidPtr, &baseResponse->CMID, post_epid_size);
 
 	// number of bytes to encrypt
 	size_t encryptSize =
-		V6_PRE_EPID_SIZE
-		- sizeof(response->Version)
-		+ pidSize
-		+ post_epid_size;
+		V6_PRE_EPID_SIZE - sizeof(response->Version) + pidSize + post_epid_size;
 
-	//AesDecryptBlock(&aesCtx, Response->IV);
-	if (v6 && !CreateV6Hmac(response->IV, encryptSize, 0)) return 0;
+	// AesDecryptBlock(&aesCtx, Response->IV);
+	if (v6 && !CreateV6Hmac(response->IV, encryptSize, 0))
+		return 0;
 
 	// Padding auto handled by encryption func
 	AesEncryptCbc(&aesCtx, NULL, response->IV, &encryptSize);
@@ -909,9 +903,8 @@ size_t CreateResponseV6(REQUEST_V6 *restrict request_v6, BYTE *const responseBuf
 	return encryptSize + sizeof(response->Version);
 }
 
-
 // Create Hashed KMS Client Request Data for KMS Protocol Version 4
-BYTE *CreateRequestV4(size_t *size, const REQUEST* requestBase)
+BYTE *CreateRequestV4(size_t *size, const REQUEST *requestBase)
 {
 	*size = sizeof(REQUEST_V4);
 
@@ -931,9 +924,8 @@ BYTE *CreateRequestV4(size_t *size, const REQUEST* requestBase)
 	return request;
 }
 
-
 // Create Encrypted KMS Client Request Data for KMS Protocol Version 6
-BYTE* CreateRequestV6(size_t *size, const REQUEST* requestBase)
+BYTE *CreateRequestV6(size_t *size, const REQUEST *requestBase)
 {
 	*size = sizeof(REQUEST_V6);
 
@@ -954,12 +946,11 @@ BYTE* CreateRequestV6(size_t *size, const REQUEST* requestBase)
 	AesCtx ctx;
 	const int_fast8_t v6 = LE16(request->MajorVer) > 5;
 	AesInitKey(&ctx, v6 ? AesKeyV6 : AesKeyV5, v6, 16);
-	AesEncryptCbc(&ctx, request->IV, (BYTE*)(&request->RequestBase), &encryptSize);
+	AesEncryptCbc(&ctx, request->IV, (BYTE *)(&request->RequestBase), &encryptSize);
 
 	// Return Proper Request Data
-	return (BYTE*)request;
+	return (BYTE *)request;
 }
-
 
 /*
  * Checks whether Length of ePID is valid
@@ -968,28 +959,28 @@ static uint8_t checkPidLength(const RESPONSE *const responseBase)
 {
 	unsigned int i;
 
-	if (LE32(responseBase->PIDSize) > (PID_BUFFER_SIZE << 1)) return FALSE;
-	if (responseBase->KmsPID[(LE32(responseBase->PIDSize) >> 1) - 1]) return FALSE;
+	if (LE32(responseBase->PIDSize) > (PID_BUFFER_SIZE << 1))
+		return FALSE;
+	if (responseBase->KmsPID[(LE32(responseBase->PIDSize) >> 1) - 1])
+		return FALSE;
 
 	for (i = 0; i < (LE32(responseBase->PIDSize) >> 1) - 2; i++)
 	{
-		if (!responseBase->KmsPID[i]) return FALSE;
+		if (!responseBase->KmsPID[i])
+			return FALSE;
 	}
 
 	return TRUE;
 }
 
-
 /*
  * "Decrypts" a KMS v4 response. Actually just copies to a fixed size buffer
  */
-RESPONSE_RESULT DecryptResponseV4(RESPONSE_V4* response_v4, const int responseSize, BYTE* const rawResponse, const BYTE* const rawRequest)
+RESPONSE_RESULT DecryptResponseV4(RESPONSE_V4 *response_v4, const int responseSize, BYTE *const rawResponse, const BYTE *const rawRequest)
 {
 	const int copySize =
 		V4_PRE_EPID_SIZE +
-		(LE32(((RESPONSE_V4*)rawResponse)->ResponseBase.PIDSize) <= PID_BUFFER_SIZE << 1 ?
-			LE32(((RESPONSE_V4*)rawResponse)->ResponseBase.PIDSize) :
-			PID_BUFFER_SIZE << 1);
+		(LE32(((RESPONSE_V4 *)rawResponse)->ResponseBase.PIDSize) <= PID_BUFFER_SIZE << 1 ? LE32(((RESPONSE_V4 *)rawResponse)->ResponseBase.PIDSize) : PID_BUFFER_SIZE << 1);
 
 	const int messageSize = copySize + V4_POST_EPID_SIZE;
 
@@ -999,14 +990,14 @@ RESPONSE_RESULT DecryptResponseV4(RESPONSE_V4* response_v4, const int responseSi
 	// ensure PID is null terminated
 	response_v4->ResponseBase.KmsPID[PID_BUFFER_SIZE - 1] = 0;
 
-	uint8_t* mac = rawResponse + messageSize;
+	uint8_t *mac = rawResponse + messageSize;
 	AesCmacV4(rawResponse, messageSize, mac);
 
-	REQUEST_V4* request_v4 = (REQUEST_V4*)rawRequest;
+	REQUEST_V4 *request_v4 = (REQUEST_V4 *)rawRequest;
 	RESPONSE_RESULT result;
 
 	result.mask = (DWORD)~0;
-	result.PidLengthOK = checkPidLength((RESPONSE*)rawResponse);
+	result.PidLengthOK = checkPidLength((RESPONSE *)rawResponse);
 	result.VersionOK = response_v4->ResponseBase.Version == request_v4->RequestBase.Version;
 	result.HashOK = !memcmp(&response_v4->MAC, mac, sizeof(response_v4->MAC));
 	result.TimeStampOK = !memcmp(&response_v4->ResponseBase.ClientTime, &request_v4->RequestBase.ClientTime, sizeof(FILETIME));
@@ -1017,23 +1008,20 @@ RESPONSE_RESULT DecryptResponseV4(RESPONSE_V4* response_v4, const int responseSi
 	return result;
 }
 
-
-static RESPONSE_RESULT VerifyResponseV6(RESPONSE_RESULT result, RESPONSE_V6* response_v6, REQUEST_V6* request_v6, BYTE* const rawResponse)
+static RESPONSE_RESULT VerifyResponseV6(RESPONSE_RESULT result, RESPONSE_V6 *response_v6, REQUEST_V6 *request_v6, BYTE *const rawResponse)
 {
 	// Check IVs
 	result.IVsOK = !memcmp // In V6 the XoredIV is actually the request IV
-	(
-		response_v6->XoredIVs,
-		request_v6->IV,
-		sizeof(response_v6->XoredIVs)
-	);
+				   (
+					   response_v6->XoredIVs,
+					   request_v6->IV,
+					   sizeof(response_v6->XoredIVs));
 
 	result.IVnotSuspicious = !!memcmp // If IVs are identical, it is obviously an emulator
-	(
-		request_v6->IV,
-		response_v6->IV,
-		sizeof(request_v6->IV)
-	);
+							  (
+								  request_v6->IV,
+								  response_v6->IV,
+								  sizeof(request_v6->IV));
 
 	// Check Hmac
 	int_fast8_t tolerance;
@@ -1041,39 +1029,36 @@ static RESPONSE_RESULT VerifyResponseV6(RESPONSE_RESULT result, RESPONSE_V6* res
 
 	result.HmacSha256OK = FALSE;
 
-	memcpy	// Save received HMAC to compare with calculated HMAC later
-	(
-		OldHmac,
-		response_v6->HMAC,
-		sizeof(response_v6->HMAC)
-	);
+	memcpy // Save received HMAC to compare with calculated HMAC later
+		(
+			OldHmac,
+			response_v6->HMAC,
+			sizeof(response_v6->HMAC));
 
-	//AesEncryptBlock(Ctx, Response_v6->IV); // CreateV6Hmac needs original IV as received over the network
+	// AesEncryptBlock(Ctx, Response_v6->IV); // CreateV6Hmac needs original IV as received over the network
 
 	for (tolerance = -1; tolerance < 2; tolerance++)
 	{
-		CreateV6Hmac
-		(
-			rawResponse + sizeof(response_v6->Version),                          // Pointer to start of the encrypted part of the response
-			(size_t)result.correctResponseSize - sizeof(response_v6->Version),   // size of the encrypted part
-			tolerance                                                            // tolerance -1, 0, or +1
+		CreateV6Hmac(
+			rawResponse + sizeof(response_v6->Version),						   // Pointer to start of the encrypted part of the response
+			(size_t)result.correctResponseSize - sizeof(response_v6->Version), // size of the encrypted part
+			tolerance														   // tolerance -1, 0, or +1
 		);
 
 		result.HmacSha256OK = !memcmp // Compare both HMACs
-		(
-			OldHmac,
-			rawResponse + (size_t)result.correctResponseSize - sizeof(response_v6->HMAC),
-			sizeof(OldHmac)
-		);
+							  (
+								  OldHmac,
+								  rawResponse + (size_t)result.correctResponseSize - sizeof(response_v6->HMAC),
+								  sizeof(OldHmac));
 
-		if (result.HmacSha256OK) break;
+		if (result.HmacSha256OK)
+			break;
 	}
 
 	return result;
 }
 
-
-static RESPONSE_RESULT VerifyResponseV5(RESPONSE_RESULT result, REQUEST_V5* request_v5, RESPONSE_V5* response_v5)
+static RESPONSE_RESULT VerifyResponseV5(RESPONSE_RESULT result, REQUEST_V5 *request_v5, RESPONSE_V5 *response_v5)
 {
 	// Check IVs: in V5 (and only v5) request and response IVs must match
 	result.IVsOK = !memcmp(request_v5->IV, response_v5->IV, sizeof(request_v5->IV));
@@ -1084,12 +1069,11 @@ static RESPONSE_RESULT VerifyResponseV5(RESPONSE_RESULT result, REQUEST_V5* requ
 	return result;
 }
 
-
 /*
  * Decrypts a KMS v5 or v6 response received from a server.
  * hwid must supply a valid 16 byte buffer for v6. hwid is ignored in v5
  */
-RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BYTE* const response, const BYTE* const rawRequest, BYTE* hwid)
+RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6 *response_v6, int responseSize, BYTE *const response, const BYTE *const rawRequest, BYTE *hwid)
 {
 	RESPONSE_RESULT result;
 	result.mask = (DWORD)~0; // Set all bits in the results mask to 1. Assume success first.
@@ -1102,13 +1086,13 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	responseSize -= copySize1;
 
 	AesCtx ctx;
-	const int_fast8_t v6 = LE16(((RESPONSE_V6*)response)->MajorVer) > 5;
+	const int_fast8_t v6 = LE16(((RESPONSE_V6 *)response)->MajorVer) > 5;
 
 	AesInitKey(&ctx, v6 ? AesKeyV6 : AesKeyV5, v6, AES_KEY_BYTES);
 	AesDecryptCbc(&ctx, NULL, response + copySize1, responseSize);
 
 	// Check padding
-	BYTE* lastPadByte = response + (size_t)result.effectiveResponseSize - 1;
+	BYTE *lastPadByte = response + (size_t)result.effectiveResponseSize - 1;
 
 	// Must be from 1 to 16
 	if (!*lastPadByte || *lastPadByte > AES_BLOCK_BYTES)
@@ -1118,7 +1102,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	}
 
 	// Check if pad bytes are all the same
-	BYTE* padByte;
+	BYTE *padByte;
 	for (padByte = lastPadByte - *lastPadByte + 1; padByte < lastPadByte; padByte++)
 	{
 		if (*padByte != *lastPadByte)
@@ -1129,7 +1113,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	}
 
 	// Add size of Version, KmsPIDLen and variable size PID
-	const DWORD pidSize = LE32(((RESPONSE_V6*)response)->ResponseBase.PIDSize);
+	const DWORD pidSize = LE32(((RESPONSE_V6 *)response)->ResponseBase.PIDSize);
 
 	copySize1 +=
 		V6_UNENCRYPTED_SIZE +
@@ -1150,7 +1134,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	// A basic client doesn't need the stuff below this comment but we want to use vlmcs
 	// as a debug tool for KMS emulators.
 
-	REQUEST_V6* request_v6 = (REQUEST_V6*)rawRequest;
+	REQUEST_V6 *request_v6 = (REQUEST_V6 *)rawRequest;
 	const DWORD decryptSize = sizeof(request_v6->IV) + sizeof(request_v6->RequestBase) + sizeof(request_v6->Pad);
 
 	AesDecryptCbc(&ctx, NULL, request_v6->IV, decryptSize);
@@ -1162,7 +1146,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 		request_v6->Version == request_v6->RequestBase.Version;
 
 	// Check Base Request
-	result.PidLengthOK = checkPidLength(&((RESPONSE_V6*)response)->ResponseBase);
+	result.PidLengthOK = checkPidLength(&((RESPONSE_V6 *)response)->ResponseBase);
 	result.TimeStampOK = !memcmp(&response_v6->ResponseBase.ClientTime, &request_v6->RequestBase.ClientTime, sizeof(FILETIME));
 	result.ClientMachineIDOK = IsEqualGUID(&response_v6->ResponseBase.CMID, &request_v6->RequestBase.CMID);
 
@@ -1178,9 +1162,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 
 	// size before encryption (padding not included)
 	result.correctResponseSize =
-		(v6 ? sizeof(RESPONSE_V6) : sizeof(RESPONSE_V5))
-		- sizeof(response_v6->ResponseBase.KmsPID)
-		+ LE32(response_v6->ResponseBase.PIDSize);
+		(v6 ? sizeof(RESPONSE_V6) : sizeof(RESPONSE_V5)) - sizeof(response_v6->ResponseBase.KmsPID) + LE32(response_v6->ResponseBase.PIDSize);
 
 	// Version specific stuff
 	if (v6)
@@ -1194,7 +1176,7 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 	else // V5
 	{
 		// Verify the V5 specific part of the response
-		result = VerifyResponseV5(result, request_v6, (RESPONSE_V5*)response_v6);
+		result = VerifyResponseV5(result, request_v6, (RESPONSE_V5 *)response_v6);
 	}
 
 	// padded size after encryption
@@ -1202,4 +1184,3 @@ RESPONSE_RESULT DecryptResponseV6(RESPONSE_V6* response_v6, int responseSize, BY
 
 	return result;
 }
-
