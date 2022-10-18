@@ -1,5 +1,5 @@
 #!/bin/sh
-MONGO_PARTIAL_KEY=`echo $MONGODB_API_KEY | md5sum`
+MONGODB_PARTIAL_KEY=`echo $MONGODB_API_KEY | md5sum`
 echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
 echo "for managing use the private key corresponding to:" 
 echo $SSH_MANAGEMENT_KEY
