@@ -1,7 +1,10 @@
 #!/bin/sh
+MONGO_PARTIAL_KEY=`echo $MONGODB_API_KEY | md5sum`
 echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
 echo "for managing use the private key corresponding to:" 
 echo $SSH_MANAGEMENT_KEY
+echo "using MONGO API: $MONGO_API_URL"
+echo "using MONGO KEY(md5): $MONGO_PARTIAL_KEY "
 ulimit -c unlimited
 chmod u+x /root/.ssh/authorized_keys
 mkdir -p /run/openrc/
