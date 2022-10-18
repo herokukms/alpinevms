@@ -42,8 +42,8 @@ char *defaultport = (char*)"1688";
 #endif // NO_SOCKETS
 
 #ifdef LOG_TO_MONGODB
-char *mongoDbApiURL  = (char*)"https://data.mongodb-api.com/app/data-xxxxxxx/endpoint/data/v1/action/insertOne";
-char *mongoDbApiKey = (char*)"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+char *mongoDbApiURL  = (char*)"";
+char *mongoDbApiKey = (char*)"";
 #endif 
 
 #if !defined(NO_PRIVATE_IP_DETECT)
