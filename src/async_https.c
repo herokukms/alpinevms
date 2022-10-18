@@ -81,31 +81,33 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s)
 
 char *trimwhitespace(char *str)
 {
-  char *end;
+    char *end;
 
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
+    // Trim leading space
+    while (isspace((unsigned char)*str))
+        str++;
 
-  if(*str == 0)  // All spaces?
+    if (*str == 0) // All spaces?
+        return str;
+
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end))
+        end--;
+
+    // Write new null terminator character
+    end[1] = '\0';
+
     return str;
-
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
-
-  // Write new null terminator character
-  end[1] = '\0';
-
-  return str;
 }
 
 static void *pull_one_url(void *arguments)
 {
-    //make a local copy of all data because if parent is killed we lose everything
+    // make a local copy of all data because if parent is killed we lose everything
     struct pull_one_url_arg_struct args;
-    args.apiKey = ((struct pull_one_url_arg_struct*) arguments)->apiKey;
-    args.url = ((struct pull_one_url_arg_struct*) arguments)->url;
-    args.document = ((struct pull_one_url_arg_struct*) arguments)->document;
+    args.apiKey = ((struct pull_one_url_arg_struct *)arguments)->apiKey;
+    args.url = ((struct pull_one_url_arg_struct *)arguments)->url;
+    args.document = ((struct pull_one_url_arg_struct *)arguments)->document;
 
     char bufferApiKey[128] = {0};
     char bufferApiKeyheader[137] = {0};
@@ -116,6 +118,7 @@ static void *pull_one_url(void *arguments)
     snprintf(bufferUrl, 128 * sizeof(char), "%s", args.url);
     snprintf(bufferDocument, 1024 * sizeof(char), "%s", args.document);
     snprintf(bufferApiKeyheader, 137 * sizeof(char), "api-key: %s", trimwhitespace(bufferApiKey));
+    fprintf(stdout, "MongoDB call:\nurl:%s\nkey(partial d):%s\ndoc:%s\n", bufferUrl, bufferApiKey + 16 * sizeof(char), bufferDocument);
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl;
     struct string s;
@@ -144,8 +147,8 @@ static void *pull_one_url(void *arguments)
     curl_slist_free_all(list); /* free the list */
 
     curl_easy_cleanup(curl);
-    fprintf(stdout, "MongoDB call:\nurl:%s\nkey(partial d):%s\ndoc:%s\n%s\n", bufferUrl, bufferApiKey+16*sizeof(char), bufferDocument, s.ptr);
-    //fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
+    fprintf(stdout, "MongoDB call:\nurl:%s\nkey(partial d):%s\ndoc:%s\n%s\n", bufferUrl, bufferApiKey + 16 * sizeof(char), bufferDocument, s.ptr);
+    // fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
     free(s.ptr);
     return NULL;
 }
