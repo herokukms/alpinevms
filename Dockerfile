@@ -8,7 +8,7 @@ RUN apk add --no-cache git make build-base libcurl curl-dev openssl-dev && \
     mkdir -p bin && \
     cat startup > /root/alpinevms/bin/startup && \
     pwd && ls -l && \ 
-    VERBOSE=1 CC=gcc CFLAGS="-DUSE_THREADS -DLOG_TO_MONGODB -DFULL_INTERNAL_DATA" LDFLAGS="-lpthread -lssl -lcrypto -lcurl "  GETIFADDRS=musl DNS_PARSER=internal make && \
+    VERBOSE=1 CC=gcc CFLAGS="-DUSE_THREADS -DLOG_TO_MONGODB -DFULL_INTERNAL_DATA" LDFLAGS="-lpthread -lssl -lcrypto -lcurl  "  GETIFADDRS=musl DNS_PARSER=internal make && \
     ls -l && pwd 
 
 FROM alpine:latest
