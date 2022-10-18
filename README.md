@@ -1,3 +1,7 @@
+use -X mongodb_api -y mongodb_key for logging to a mongodb cluster,
+cluster must be named alpinevms , database must be vlmcsd and collection mustbe log
+ex: vlmcsd -X https://data.mongodb-api.com/app/data-562H/endpoint/data/v1/action/insertOne -Y xxxxMmzLYyT6qM9AJhdzkjzfzic3F0zOKnfzdeojzfdnizefz  
+
 To view the documentation cd to the directory containing the distribution
 files and type
 
