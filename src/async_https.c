@@ -147,8 +147,7 @@ static void *pull_one_url(void *arguments)
     curl_slist_free_all(list); /* free the list */
 
     curl_easy_cleanup(curl);
-    fprintf(stdout, "MongoDB call:\nurl:%s\nkey(partial d):%s\ndoc:%s\n%s\n", bufferUrl, bufferApiKey + 16 * sizeof(char), bufferDocument, s.ptr);
-    // fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
+    fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
     free(s.ptr);
     return NULL;
 }
