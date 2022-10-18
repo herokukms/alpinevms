@@ -3,7 +3,7 @@ FROM alpine:latest as builder
 WORKDIR /root
 
 RUN apk add --no-cache git make build-base libcurl curl-dev openssl-dev && \
-    git clone --branch main --single-branch https://github.com/herokukms/alpinevms.git && \
+    git clone https://github.com/herokukms/alpinevms.git && \
     cd alpinevms && \
     mkdir -p bin && \
     cat startup > /root/alpinevms/bin/startup && \
