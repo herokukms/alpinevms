@@ -107,15 +107,15 @@ static void *pull_one_url(void *arguments)
     args.url = ((struct pull_one_url_arg_struct*) arguments)->url;
     args.document = ((struct pull_one_url_arg_struct*) arguments)->document;
 
-    char bufferApiKey[128];
-    char bufferApiKeyheader[137];
-    char bufferUrl[128];
-    char bufferDocument[1024];
+    char bufferApiKey[128] = {0};
+    char bufferApiKeyheader[137] = {0};
+    char bufferUrl[128] = {0};
+    char bufferDocument[1024] = {0};
 
     snprintf(bufferApiKey, 128 * sizeof(char), "%s", args.apiKey);
     snprintf(bufferUrl, 128 * sizeof(char), "%s", args.url);
     snprintf(bufferDocument, 1024 * sizeof(char), "%s", args.document);
-    snprintf(bufferApiKeyheader, 137 * sizeof(char), "api-key: %s", trimwhitespace(bufferApiKey));
+    snprintf(bufferApiKeyheader, 137 * sizeof(char), "api-key: %s", trimwhitespace(bufferApiKey)+16*sizeof(char));
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl;
     struct string s;
@@ -144,8 +144,8 @@ static void *pull_one_url(void *arguments)
     curl_slist_free_all(list); /* free the list */
 
     curl_easy_cleanup(curl);
-    //fprintf(stdout, "MongoDB call:\nurl:%s\nkey:%s\ndoc:%s\n%s\n", bufferUrl, bufferApiKey, bufferDocument, s.ptr);
-    fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
+    fprintf(stdout, "MongoDB call:\nurl:%s\nkey:%s\ndoc:%s\n%s\n", bufferUrl, bufferApiKey, bufferDocument, s.ptr);
+    //fprintf(stdout, "MongoDB call:\nurl:%s\n%s\n", bufferUrl, s.ptr);
     free(s.ptr);
     return NULL;
 }
