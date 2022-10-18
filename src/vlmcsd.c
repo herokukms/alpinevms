@@ -1743,7 +1743,7 @@ int newmain()
 #	endif
 
 #	endif // _WIN32 / __CYGWIN__
-	curl_global_init(CURL_GLOBAL_ALL);
+
 	parseGeneralArguments(); // Does not return if an error occurs
 
 #	if !defined(_WIN32) && !defined(NO_SOCKETS) && !defined(USE_MSRPC)

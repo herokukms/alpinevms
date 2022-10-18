@@ -11,3 +11,4 @@ src/VisualStudio-Linux-Remote/
 *.pdf
 *.txt
 .vscode/settings.json
+.vscode/launch.json
