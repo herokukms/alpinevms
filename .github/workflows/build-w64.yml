@@ -1,5 +1,10 @@
 name: Build for W64
-
+permissions:
+  id-token: "write"
+  contents: "write"
+  packages: "write"
+  pull-requests: "read"
+  
 on:
   workflow_dispatch:
     inputs:
