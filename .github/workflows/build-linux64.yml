@@ -1,4 +1,4 @@
-name: Build for W64
+name: Build for Linux64
 
 on: [push]
   # workflow_dispatch:
@@ -18,7 +18,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-w64:
+  build-linux64:
     runs-on: ubuntu-latest
     permissions: write-all
 
@@ -36,7 +36,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: nightly-tag-${{ steps.date.outputs.date }}
+          automatic_release_tag: nightly-linux64-${{ steps.date.outputs.date }}
           prerelease: false
           title: "Linux 64"
           files: |
