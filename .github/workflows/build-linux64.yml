@@ -31,7 +31,7 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Build linux64 executables
-        run: ./build-forlinux64
+        run: CFLAGS="-I/usr/include/x86_64-linux-gnu/" ./build-forlinux64
       - name: Zip binaries
         run: zip --junk-paths vlmcs bin/vlmcs bin/vlmcsd
       - name: Create Release
