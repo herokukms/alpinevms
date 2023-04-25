@@ -1,4 +1,4 @@
 #!/bin/sh
 make clean
-VERBOSE=1 CC=gcc CFLAGS="-static -DFULL_INTERNAL_DATA" LDFLAGS="-static /usr/lib/x86_64-linux-gnu/libpthread.a"  GETIFADDRS=musl DNS_PARSER=internal make
+VERBOSE=1 CC=gcc CFLAGS="$CFLAGS -static -DFULL_INTERNAL_DATA" LDFLAGS="-static /usr/lib/x86_64-linux-gnu/libpthread.a"  GETIFADDRS=musl DNS_PARSER=internal make
 #cp etc/vlmcsd.ini  etc/vlmcsd.kmd bin/
