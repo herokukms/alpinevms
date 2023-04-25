@@ -1,4 +1,4 @@
 #!/bin/sh
 make clean
-CC=x86_64-w64-mingw32-gcc CFLAGS="-DFULL_INTERNAL_DATA" make
+VERBOSE=1  CC=x86_64-w64-mingw32-gcc DNS_PARSER=internal CFLAGS="$CFLAGS -DFULL_INTERNAL_DATA" MAX_THREADS=1 make -j1
 #cp etc/vlmcsd.ini  etc/vlmcsd.kmd bin/
