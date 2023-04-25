@@ -20,7 +20,6 @@ env:
 jobs:
   build-w64:
     runs-on: ubuntu-latest
-    container: highcanfly/ubuntu-w64
     permissions: write-all
 
     steps:
@@ -30,15 +29,15 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Build w64 executables
-        run: CFLAGS="-I/usr/include/x86_64-linux-gnu" ./build-forwindows64
+        run: ./build-forlinux64
       - name: Zip binaries
-        run: zip --junk-paths vlmcs bin/vlmcs.exe bin/vlmcsd.exe
+        run: zip --junk-paths vlmcs bin/vlmcs bin/vlmcsd
       - name: Create Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: nightly-tag-${{ steps.date.outputs.date }}
           prerelease: false
-          title: "Windows 64"
+          title: "Linux 64"
           files: |
             vlmcs.zip
