@@ -1,9 +1,4 @@
 name: Build for W64
-permissions:
-  id-token: "write"
-  contents: "write"
-  packages: "write"
-  pull-requests: "read"
 
 on: [push]
   # workflow_dispatch:
@@ -26,9 +21,7 @@ jobs:
   build-w64:
     runs-on: ubuntu-latest
     container: highcanfly/ubuntu-w64
-    permissions:
-      contents: read
-      packages: write
+    permissions: write-all
 
     steps:
       - name: Checkout repository
