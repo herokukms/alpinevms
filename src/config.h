@@ -24,7 +24,7 @@
    * Define your own version identifier here, e.g. '#define VERSION "my vlmcsd based on 1103"'
    */
 
-#define VERSION "© Microsoft april 2023"
+#define VERSION "© Microsoft may 2023"
 
 #endif // VERSION
 
