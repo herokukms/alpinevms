@@ -2,6 +2,7 @@
 #define PROXY_PROTOCOL_H_
 
 #ifndef _WIN32
+#include <sys/socket.h>
 enum {
   LIBPROXYPROTO_V1 = (1 << 0),
   LIBPROXYPROTO_V2 = (1 << 1),
