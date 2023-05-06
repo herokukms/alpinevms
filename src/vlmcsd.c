@@ -1719,8 +1719,10 @@ int setupListeningSockets()
 
 int server_main(int argc, CARGV argv)
 {
+	#ifndef _WIN32
 	// initialize the HAProxu proxy protocol support
 	_proxy_protocol_init();
+	#endif
 	global_argc = argc;
 	global_argv = argv;
 
