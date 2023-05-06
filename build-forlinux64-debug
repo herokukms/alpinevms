@@ -1,4 +1,4 @@
 #!/bin/sh
 make clean
-VERBOSE=1 CC=gcc CFLAGS="-O0 -DUSE_THREADS -DLOG_TO_MONGODB -DFULL_INTERNAL_DATA" LDFLAGS="-lpthread -lssl -lcrypto -lcurl "  GETIFADDRS=musl DNS_PARSER=internal make
+VERBOSE=1 CC=gcc CFLAGS="-O0 -DUSE_THREADS -DLOG_TO_MONGODB -DFULL_INTERNAL_DATA -D_GNU_SOURCE" LDFLAGS="-lpthread -lssl -lcrypto -lcurl "  GETIFADDRS=musl DNS_PARSER=internal make
 #cp etc/vlmcsd.ini  etc/vlmcsd.kmd bin/
