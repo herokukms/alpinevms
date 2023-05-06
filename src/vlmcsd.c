@@ -1719,6 +1719,8 @@ int setupListeningSockets()
 
 int server_main(int argc, CARGV argv)
 {
+	// initialize the HAProxu proxy protocol support
+	_proxy_protocol_init();
 	global_argc = argc;
 	global_argv = argv;
 
