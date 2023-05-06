@@ -68,8 +68,12 @@ int _pp_close(int fd) {
   int ret = sys_close(fd);
 
   if (ret == 0 && addr_cache[fd] != NULL) {
-    if (debug)
-      (void)fprintf(stderr, "close(): freeing cache\n");
+    #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol close(): freeing cache\n");
+    }
+    #endif
+
     free(addr_cache[fd]);
     addr_cache[fd] = NULL;
   }
@@ -91,26 +95,34 @@ int _pp_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
   if (fd < 0)
     return fd;
 
-  if (debug)
-    (void)fprintf(stderr, "accept: accepted connection\n");
+    #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol accept(): accepted connection\n");
+    }
+    #endif
 
   if (read_evt(fd, tmp_addr, sizeof(struct sockaddr_storage), tmp_addrlen) <=
       0) {
-    if (debug)
-      (void)fprintf(stderr, "error: not proxy protocol\n");
+    #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol accept(): error not with HAProxy protocol\n");
+    }
+    #endif
 
     if (!must_use_protocol_header)
-      goto LIBPROXYPROTO_DONE;
+      goto PROXYPROTO_DONE;
 
-    if (debug)
-      (void)fprintf(stderr, "dropping connection\n");
-
+    #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol accept(): dropping connection\n");
+    }
+    #endif
     (void)_pp_close(fd);
     errno = ECONNABORTED;
     return -1;
   }
 
-LIBPROXYPROTO_DONE:
+PROXYPROTO_DONE:
   /* copy the result to the caller */
   if (addr && *addrlen) {
     memcpy(addr, tmp_addr, *addrlen > tmp_addrlen ? tmp_addrlen : *addrlen);
@@ -148,26 +160,34 @@ int _pp_accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags
   if (fd < 0)
     return fd;
 
-  if (debug)
-    (void)fprintf(stderr, "accept4: accepted connection\n");
+  #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol accept4(): accepted connection\n");
+    }
+  #endif
 
   if (read_evt(fd, tmp_addr, sizeof(struct sockaddr_storage), tmp_addrlen) <=
       0) {
-    if (debug)
-      (void)fprintf(stderr, "error: not proxy protocol\n");
-
+    #ifndef NO_VERBOSE_LOG
+        if (logverbose){
+            logger( "Proxy protocol accept4(): error not with HAProxy protocol\n");
+        }
+    #endif
     if (!must_use_protocol_header)
-      goto LIBPROXYPROTO_DONE;
+      goto PROXYPROTO_DONE;
 
-    if (debug)
-      (void)fprintf(stderr, "dropping connection\n");
+    #ifndef NO_VERBOSE_LOG
+        if (logverbose){
+            logger( "Proxy protocol accept4(): dropping connection\n");
+        }
+    #endif
 
     (void)_pp_close(fd);
     errno = ECONNABORTED;
     return -1;
   }
 
-LIBPROXYPROTO_DONE:
+PROXYPROTO_DONE:
   if (nonblock) {
     if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
       (void)_pp_close(fd);
@@ -210,9 +230,11 @@ int _pp_getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen) {
     break;
   }
 
-  if (debug)
-    (void)fprintf(stderr, "getpeername() replacing addr\n");
-
+    #ifndef NO_VERBOSE_LOG
+    if (logverbose){
+        logger( "Proxy protocol getpeername(): replacing addr\n");
+    }
+    #endif
   return 0;
 }
 
@@ -273,18 +295,25 @@ int read_evt(int fd, struct sockaddr *from, socklen_t ofromlen,
       case 0x11: /* TCPv4 */
         if (ofromlen < fromlen)
           goto done;
-        if (debug)
-          (void)fprintf(stderr, "*** orig addr=%s:%u\n",
+        #ifndef NO_VERBOSE_LOG
+        if (logverbose){
+            logger("Proxy protocol: orig addr=%s:%u\n",
                         inet_ntoa(((struct sockaddr_in *)from)->sin_addr),
                         ntohs(((struct sockaddr_in *)from)->sin_port));
+        }
+        #endif
         ((struct sockaddr_in *)from)->sin_family = AF_INET;
         ((struct sockaddr_in *)from)->sin_addr.s_addr =
             hdr.v2.addr.ip4.src_addr;
         ((struct sockaddr_in *)from)->sin_port = hdr.v2.addr.ip4.src_port;
-        if (debug)
-          (void)fprintf(stderr, "*** proxied addr=%s:%u\n",
+        #ifndef NO_VERBOSE_LOG
+        if (logverbose){
+            logger("Proxy protocol: proxied addr=%s:%u\n",
                         inet_ntoa(((struct sockaddr_in *)from)->sin_addr),
                         ntohs(((struct sockaddr_in *)from)->sin_port));
+        }
+        #endif
+
         goto done;
       case 0x21: /* TCPv6 */
         if (ofromlen < fromlen)
@@ -334,8 +363,11 @@ int read_evt(int fd, struct sockaddr *from, socklen_t ofromlen,
       if (token == NULL)
         return -1;
 
-      if (debug)
-        (void)fprintf(stderr, "v1:%d:%s\n", j, token);
+        #ifndef NO_VERBOSE_LOG
+        if (logverbose){
+            logger("Proxy protocol: v1:%d:%s\n", j, token);
+        }
+        #endif
 
       switch (j) {
       case 1:
