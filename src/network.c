@@ -11,6 +11,10 @@
 
 #include "types.h"
 
+#ifndef _WIN32
+#include "proxy_protocol.h"
+#endif
+
 #if HAVE_GETIFADDR && _WIN32
 #include <iphlpapi.h>
 #endif
@@ -721,7 +725,7 @@ static SOCKET network_accept_any()
 	if (sock == INVALID_SOCKET)
 		return INVALID_SOCKET;
 	else
-		return accept(sock, NULL, NULL);
+		return _pp_accept(sock, NULL, NULL);
 }
 #endif // !SIMPLE_SOCKETS
 
@@ -785,7 +789,7 @@ static void serveClient(const SOCKET s_client, const DWORD RpcAssocGroup)
 
 	len = sizeof(addr);
 
-	if (getpeername(s_client, (struct sockaddr*)&addr, &len) ||
+	if (_pp_getpeername(s_client, (struct sockaddr*)&addr, &len) ||
 		!ip2str(ipstr, sizeof(ipstr), (struct sockaddr*)&addr, len))
 	{
 #		if !defined(NO_LOG) && defined(_PEDANTIC)

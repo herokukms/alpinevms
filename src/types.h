@@ -349,7 +349,7 @@ typedef void* sockopt_t;
 #define SOCKET int
 #define INVALID_SOCKET -1
 #define socket_errno errno
-#define socketclose(x) (close(x))
+#define socketclose(x) (_pp_close(x))
 #define vlmcsd_strerror strerror
 #define VLMCSD_SHUT_RD SHUT_RD
 #define VLMCSD_SHUT_WR SHUT_WR
