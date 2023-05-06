@@ -725,7 +725,11 @@ static SOCKET network_accept_any()
 	if (sock == INVALID_SOCKET)
 		return INVALID_SOCKET;
 	else
+	#ifndef _WIN32
 		return _pp_accept(sock, NULL, NULL);
+	#else
+		return accept(sock, NULL, NULL);
+	#endif
 }
 #endif // !SIMPLE_SOCKETS
 
@@ -788,9 +792,13 @@ static void serveClient(const SOCKET s_client, const DWORD RpcAssocGroup)
 	struct sockaddr_storage addr;
 
 	len = sizeof(addr);
-
+	#ifndef _WIN32
 	if (_pp_getpeername(s_client, (struct sockaddr*)&addr, &len) ||
 		!ip2str(ipstr, sizeof(ipstr), (struct sockaddr*)&addr, len))
+	#else
+	if (getpeername(s_client, (struct sockaddr*)&addr, &len) ||
+		!ip2str(ipstr, sizeof(ipstr), (struct sockaddr*)&addr, len))
+	#endif
 	{
 #		if !defined(NO_LOG) && defined(_PEDANTIC)
 		logger("Fatal: Cannot determine client's IP address: %s\n", vlmcsd_strerror(errno));
