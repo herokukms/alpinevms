@@ -1,6 +1,7 @@
 #ifndef PROXY_PROTOCOL_H_
 #define PROXY_PROTOCOL_H_
 
+#ifndef _WIN32
 enum {
   LIBPROXYPROTO_V1 = (1 << 0),
   LIBPROXYPROTO_V2 = (1 << 1),
@@ -29,4 +30,5 @@ static char *debug;
 static char *must_use_protocol_header;
 static int version = LIBPROXYPROTO_V1 | LIBPROXYPROTO_V2;
 
+#endif
 #endif

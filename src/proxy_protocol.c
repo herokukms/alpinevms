@@ -12,6 +12,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifndef _WIN32
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <dlfcn.h>
@@ -445,3 +446,4 @@ done:
   } while (ret == -1 && errno == EINTR);
   return (ret >= 0) ? 1 : -1;
 }
+#endif
