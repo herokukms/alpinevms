@@ -416,13 +416,13 @@ static int32_t getProductIndexFromAllLists(const GUID *guid, char **productName)
 /*
  * Logs a Request
  */
-static void logRequest(REQUEST *baseRequest)
+static void logRequest(REQUEST *baseRequest,const char *const ipstr)
 {
 #ifndef NO_VERBOSE_LOG
 	if (logverbose)
 	{
 		logger("<<< Incoming KMS request\n");
-		logRequestVerbose(baseRequest, &logger);
+		logRequestVerbose(baseRequest, &logger, ipstr);
 		return;
 	}
 #endif // NO_VERBOSE_LOG
@@ -575,7 +575,7 @@ static HRESULT __stdcall CreateResponseBaseCallback(REQUEST *baseRequest, RESPON
 {
 	const char *EpidSource;
 #ifndef NO_LOG
-	logRequest(baseRequest);
+	logRequest(baseRequest,ipstr_unused);
 #ifdef _PEDANTIC
 	CheckRequest(baseRequest);
 #endif // _PEDANTIC

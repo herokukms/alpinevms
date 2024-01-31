@@ -180,7 +180,7 @@ void uuid2StringLE(const GUID *const guid, char *const string)
 }
 
 #if !defined(NO_VERBOSE_LOG) && !defined(NO_LOG)
-void logRequestVerbose(REQUEST* Request, const PRINTFUNC p)
+void logRequestVerbose(REQUEST* Request, const PRINTFUNC p, const char *const ipstr)
 {
 	char guidBuffer[GUID_STRING_LENGTH + 1];
 	char WorkstationBuffer[3 * WORKSTATION_NAME_BUFFER];
@@ -217,7 +217,7 @@ void logRequestVerbose(REQUEST* Request, const PRINTFUNC p)
 	p("Client request timestamp (UTC)  : %s\n", mbstr);
 
 	ucs2_to_utf8(Request->WorkstationName, WorkstationBuffer, WORKSTATION_NAME_BUFFER, sizeof(WorkstationBuffer));
-
+	p("Client IP                       : %s\n", ipstr);
 	p("Workstation name                : %s\n", WorkstationBuffer);
 	p("N count policy (minimum clients): %u\n", (uint32_t)LE32(Request->N_Policy));
 }

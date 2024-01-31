@@ -14,7 +14,7 @@ typedef int (*PRINTFUNC)(const char *const fmt, ...);
 
 int printerrorf(const char *const fmt, ...);
 int errorout(const char* fmt, ...);
-void logRequestVerbose(REQUEST* Request, const PRINTFUNC p);
+void logRequestVerbose(REQUEST* Request, const PRINTFUNC p, const char *const ipstr);
 void logResponseVerbose(const char *const ePID, const BYTE *const hwid, RESPONSE* response, const PRINTFUNC p);
 
 #ifndef NO_VERSION_INFORMATION

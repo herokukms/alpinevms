@@ -372,7 +372,7 @@ static __noreturn void usage()
 				"  -l <file>\t\tlog to <file>\n"
 				"  -T0, -T1\t\tdisable/enable logging with time and date (default -T1)\n"
 #ifndef NO_VERBOSE_LOG
-				"  -v\t\t\tlog verbose\n"
+				"  -v\t\t\tlog verbose (multiple v for more verbosity)\n"
 				"  -q\t\t\tdon't log verbose (default)\n"
 #endif // NO_VERBOSE_LOG
 #endif // NO_LOG
@@ -1257,7 +1257,7 @@ static void parseGeneralArguments()
 #ifndef NO_VERBOSE_LOG
 		case 'v':
 		case 'q':
-			logverbose = o == 'v';
+			logverbose += o == 'v';
 			ignoreIniFileParameter(INI_PARAM_LOG_VERBOSE);
 			break;
 
