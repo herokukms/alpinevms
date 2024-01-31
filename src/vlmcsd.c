@@ -291,7 +291,7 @@ static __noreturn void usage()
 				"  -Y <key>\t\tMongoDB write api key\n"
 #endif
 #ifndef NO_MONGOOSE
-				"  -W <address>:<port>\t\tstart web server on <address>:<port> (default to 0.0.0.0:8000)\n"
+				"  -w <address>:<port>\t\tstart web server on <address>:<port> (default to 0.0.0.0:8000)\n"
 #endif // NO_MONGOOSE
 #if !defined(NO_PRIVATE_IP_DETECT)
 #if HAVE_GETIFADDR
@@ -1272,7 +1272,7 @@ static void parseGeneralArguments()
 #endif // NO_LOG
 
 #ifndef NO_MONGOOSE
-		case 'W':
+		case 'w':
 			listen_params = getCommandLineArg(optarg);
 			break;
 #endif // NO_MONGOOSE
