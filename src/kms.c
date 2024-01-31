@@ -3,9 +3,9 @@
 #endif // CONFIG
 #include CONFIG
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
+// #ifndef _GNU_SOURCE
+// #define _GNU_SOURCE
+// #endif
 
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS

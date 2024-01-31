@@ -3,9 +3,9 @@
 #endif // CONFIG
 #include CONFIG
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
+// #ifndef _GNU_SOURCE
+// #define _GNU_SOURCE
+// #endif
 
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
@@ -1412,7 +1412,7 @@ static void CreateRequestBase(REQUEST *Request)
 	if (verbose)
 	{
 		printf("\nRequest Parameters\n==================\n\n");
-		logRequestVerbose(Request, &printf);
+		logRequestVerbose(Request, &printf, "");
 		printf("\n");
 	}
 #	endif // NO_VERBOSE_LOG

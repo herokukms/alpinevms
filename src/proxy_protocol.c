@@ -61,8 +61,10 @@ void _proxy_protocol_init(void)
 #pragma GCC diagnostic ignored "-Wpedantic"
   sys_close = close;   // dlsym(RTLD_NEXT, "close");
   sys_accept = accept; // dlsym(RTLD_NEXT, "accept");
+#ifndef __clang__
 #ifdef _GNU_SOURCE
-  sys_accept4 = accept4; //dlsym(RTLD_NEXT, "accept4");
+  sys_accept4 = accept4; // dlsym(RTLD_NEXT, "accept4");
+#endif
 #endif                           //_GNU_SOURCE
   sys_getpeername = getpeername; // dlsym(RTLD_NEXT, "getpeername");
 #pragma GCC diagnostic warning "-Wpedantic"
