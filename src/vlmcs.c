@@ -48,6 +48,9 @@
 #include "helpers.h"
 #include "dns_srv.h"
 
+#ifndef _WIN32
+#include "proxy_protocol.h"
+#endif // _WIN32
 
 #define VLMCS_OPTION_GRAB_INI 1
 #define VLMCS_OPTION_NO_GRAB_INI 2
