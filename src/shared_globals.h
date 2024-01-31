@@ -168,6 +168,10 @@ extern int_fast8_t logverbose;
 #endif
 #endif
 
+#ifndef NO_MONGOOSE
+extern char *listen_params;
+#endif // NO_MONGOOSE
+
 #if !defined(USE_MSRPC) && !defined(SIMPLE_RPC)
 extern uint8_t IsNDR64Defined;
 #endif 

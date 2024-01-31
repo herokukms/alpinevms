@@ -79,6 +79,10 @@ int_fast8_t logverbose = 0;
 #endif // NO_VERBOSE_LOG
 #endif // NO_LOG
 
+#ifndef NO_MONGOOSE
+char *listen_params;
+#endif // NO_MONGOOSE
+
 #ifndef NO_SOCKETS
 int_fast8_t ExitLevel = 0;
 

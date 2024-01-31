@@ -89,6 +89,10 @@
 #include "wintap.h"
 #endif
 
+#ifndef NO_MONGOOSE
+#include "web.h"
+#endif // NO_MONGOOSE
+
 static const char *const optstring = "a:N:B:m:t:A:R:u:g:L:p:i:H:P:X:Y:l:r:U:W:C:c:F:O:o:x:T:K:E:M:j:SseDdVvqkZ";
 
 #if !defined(NO_SOCKETS) && !defined(USE_MSRPC) && !defined(SIMPLE_SOCKETS)
@@ -286,6 +290,9 @@ static __noreturn void usage()
 				"  -X <url>\t\tMongoDB Api insertOne Url\n"
 				"  -Y <key>\t\tMongoDB write api key\n"
 #endif
+#ifndef NO_MONGOOSE
+				"  -W <address>:<port>\t\tstart web server on <address>:<port> (default to 0.0.0.0:8000)\n"
+#endif // NO_MONGOOSE
 #if !defined(NO_PRIVATE_IP_DETECT)
 #if HAVE_GETIFADDR
 				"  -o 0|1|2|3\t\tset protection level against clients with public IP addresses (default 0)\n"
@@ -1264,6 +1271,12 @@ static void parseGeneralArguments()
 #endif // NO_VERBOSE_LOG
 #endif // NO_LOG
 
+#ifndef NO_MONGOOSE
+		case 'W':
+			listen_params = getCommandLineArg(optarg);
+			break;
+#endif // NO_MONGOOSE
+
 #if !defined(NO_PRIVATE_IP_DETECT)
 		case 'o':
 			ignoreIniFileParameter(INI_PARAM_PUBLIC_IP_PROTECTION_LEVEL);
@@ -1738,10 +1751,10 @@ int setupListeningSockets()
 
 int server_main(int argc, CARGV argv)
 {
-	#ifndef _WIN32
+#ifndef _WIN32
 	// initialize the HAProxu proxy protocol support
 	_proxy_protocol_init();
-	#endif
+#endif
 	global_argc = argc;
 	global_argv = argv;
 
@@ -2017,6 +2030,21 @@ int newmain()
 		ReportServiceStatus(SERVICE_RUNNING, NO_ERROR, 200);
 #endif // defined(_NTSERVICE) && !defined(USE_MSRPC)
 
+#ifndef NO_MONGOOSE
+	struct mg_mgr mgr;
+	mg_mgr_init(&mgr);											   // Init manager
+	mg_log_set(logverbose);	
+	if (listen_params == NULL) listen_params = "0.0.0.0:8000";
+	char listener[7+strlen(listen_params)];	
+	sprintf(listener,"http://%s",listen_params);
+	logger("Starting Mongoose on %s\n", listener);
+	mg_http_listen(&mgr, listener, handle_web, NULL); // Setup listener
+
+	pthread_t thread;
+	pthread_create(&thread, NULL, mongooseThread, &mgr); // Create thread for Mongoose
+
+#endif // NO_MONGOOSE
+
 	int rc;
 	rc = runServer();
 
@@ -2024,10 +2052,17 @@ int newmain()
 #ifdef _NTSERVICE
 	if (!ServiceShutdown)
 #endif
-		cleanup();
+
+#ifndef NO_MONGOOSE
+	pthread_join(thread, NULL);     // Wait for Mongoose thread to finish
+	mg_mgr_free(&mgr);				// Cleanup manager
+	free(listen_params);			// Free Mongoose parameters
+#endif								// NO_MONGOOSE
+
+	cleanup();
+
 #ifdef _NTSERVICE
-	else
-		ReportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
+	else ReportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
 #endif
 
 	return rc;
