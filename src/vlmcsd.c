@@ -81,6 +81,10 @@
 #include "ntservice.h"
 #include "helpers.h"
 
+#ifndef _NTSERVICE
+#include "proxy_protocol.h"
+#endif // _NTSERVICE
+
 #ifndef NO_TAP
 #include "wintap.h"
 #endif
@@ -505,6 +509,21 @@ static BOOL getIniFileArgumentInt(unsigned int *result, const char *const argume
 	return TRUE;
 }
 
+static BOOL getIniFileArgumentInt8(int_fast8_t *result, const char *const argument, const unsigned int min, const unsigned int max)
+{
+	unsigned int tempResult;
+
+	if (!stringToInt(argument, min, max, &tempResult))
+	{
+		vlmcsd_snprintf(IniFileErrorBuffer, INIFILE_ERROR_BUFFERSIZE, "Must be integer between %u and %u", min, max);
+		IniFileErrorMessage = IniFileErrorBuffer;
+		return FALSE;
+	}
+
+	*result = tempResult;
+	return TRUE;
+}
+
 static BOOL setIniFileParameter(uint_fast8_t id, const char *const iniarg)
 {
 	unsigned int result;
@@ -653,7 +672,7 @@ static BOOL setIniFileParameter(uint_fast8_t id, const char *const iniarg)
 
 #ifndef NO_VERBOSE_LOG
 	case INI_PARAM_LOG_VERBOSE:
-		success = getIniFileArgumentBool(&logverbose, iniarg);
+		success = getIniFileArgumentInt8(&logverbose, iniarg, 0, 255);
 		break;
 
 #endif // NO_VERBOSE_LOG
