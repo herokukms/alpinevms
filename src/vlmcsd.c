@@ -2051,6 +2051,7 @@ int newmain()
 	// Clean up things and exit
 #ifdef _NTSERVICE
 	if (!ServiceShutdown)
+	{
 #endif
 
 #ifndef NO_MONGOOSE
@@ -2062,6 +2063,7 @@ int newmain()
 	cleanup();
 
 #ifdef _NTSERVICE
+	}
 	else ReportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
 #endif
 
