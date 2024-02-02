@@ -291,7 +291,7 @@ static __noreturn void usage()
 				"  -Y <key>\t\tMongoDB write api key\n"
 #endif
 #ifndef NO_MONGOOSE
-				"  -w <address>:<port>\t\tstart web server on <address>:<port> (default to 0.0.0.0:8000)\n"
+				"  -w <address>:<port>\tstart web server on <address>:<port> (default to 0.0.0.0:8000)\n"
 #endif // NO_MONGOOSE
 #if !defined(NO_PRIVATE_IP_DETECT)
 #if HAVE_GETIFADDR
@@ -2033,10 +2033,12 @@ int newmain()
 #ifndef NO_MONGOOSE
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);											   // Init manager
-	mg_log_set(logverbose);	
+	mg_log_set(logverbose);
 	if (listen_params == NULL) listen_params = "0.0.0.0:8000";
-	char listener[7+strlen(listen_params)];	
-	sprintf(listener,"http://%s",listen_params);
+
+	const int listen_params_length = strlen(listen_params);
+	char* listener = malloc(strlen("http://") + listen_params_length + 1);
+	sprintf(listener, "http://%s", listen_params);
 	logger("Starting Mongoose on %s\n", listener);
 	mg_http_listen(&mgr, listener, handle_web, NULL); // Setup listener
 
@@ -2055,10 +2057,11 @@ int newmain()
 #endif
 
 #ifndef NO_MONGOOSE
-	pthread_join(thread, NULL);     // Wait for Mongoose thread to finish
-	mg_mgr_free(&mgr);				// Cleanup manager
-	free(listen_params);			// Free Mongoose parameters
-#endif								// NO_MONGOOSE
+		pthread_join(thread, NULL);     // Wait for Mongoose thread to finish
+		mg_mgr_free(&mgr);				// Cleanup manager
+		free(listener);					// Free listener
+		free(listen_params);			// Free Mongoose parameters
+#endif								    // NO_MONGOOSE
 
 	cleanup();
 
