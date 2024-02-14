@@ -21,7 +21,7 @@ jobs:
         arch: x64
 
     - name: Install xp tools
-      run: """C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe"" modify --add Microsoft.VisualStudio.Component.WinXP --quiet --installPath ""C:\\Program Files\\Microsoft Visual Studio\\2019\\BuildTools"""
+      run: "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe\" modify --add Microsoft.VisualStudio.Component.WinXP --quiet --installPath \"C:\\Program Files\\Microsoft Visual Studio\\2019\\BuildTools\Ò""
 
     - name: Build solution
       run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
