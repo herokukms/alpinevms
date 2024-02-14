@@ -1,7 +1,10 @@
-﻿using System;
+﻿using HGM.Hotbird64.LicenseManager.Contracts;
+using HGM.Hotbird64.LicenseManager.Extensions;
+using HGM.Hotbird64.Vlmcs;
+using LicenseManager.Annotations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -17,10 +20,6 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Serialization;
-using HGM.Hotbird64.LicenseManager.Contracts;
-using HGM.Hotbird64.LicenseManager.Extensions;
-using HGM.Hotbird64.Vlmcs;
-using LicenseManager.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace HGM.Hotbird64.LicenseManager
@@ -52,11 +51,11 @@ namespace HGM.Hotbird64.LicenseManager
                     return ExternalFileName;
                 }
 
-                var tempName = Path.GetTempFileName();
+                string tempName = Path.GetTempFileName();
 
-                using (var compressedStream = Application.GetResourceStream(Uri).Stream)
-                using (var stream = new GZipStream(compressedStream, CompressionMode.Decompress, false))
-                using (var file = new FileStream(tempName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (Stream compressedStream = Application.GetResourceStream(Uri).Stream)
+                using (GZipStream stream = new GZipStream(compressedStream, CompressionMode.Decompress, false))
+                using (FileStream file = new FileStream(tempName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     stream.CopyTo(file);
                 }
@@ -68,22 +67,6 @@ namespace HGM.Hotbird64.LicenseManager
             internal set => tempFileName = value;
         }
 
-        //public override bool Equals(object obj)
-        //{
-        //    if (!(obj is PKeyConfigFile other))
-        //    {
-        //        return false;
-        //    }
-
-        //    return BaseFileName == other.BaseFileName;
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    // ReSharper disable once NonReadonlyMemberInGetHashCode
-        //    return BaseFileName.GetHashCode();
-        //}
-
         public override string ToString() => DisplayName;
     }
 
@@ -94,7 +77,6 @@ namespace HGM.Hotbird64.LicenseManager
         public static ISet<ProductKeyConfigurationConfigurationsConfiguration> KeyConfigs => PKeyConfig.Items.OfType<ProductKeyConfigurationConfigurations>().Single().Configuration;
         public static ISet<ProductKeyConfigurationPublicKeysPublicKey> PublicKeys => PKeyConfig.Items.OfType<ProductKeyConfigurationPublicKeys>().Single().PublicKey;
         public static ISet<ProductKeyConfigurationKeyRangesKeyRange> KeyRanges => PKeyConfig.Items.OfType<ProductKeyConfigurationKeyRanges>().Single().KeyRange;
-
         private readonly Random random = new Random(unchecked((int)DateTime.Now.Ticks));
         private IEnumerable<ProductKeyConfigurationKeyRangesKeyRange> keyRanges;
         private ProductKeyConfigurationConfigurationsConfiguration keyConfig;
@@ -106,7 +88,6 @@ namespace HGM.Hotbird64.LicenseManager
         private readonly bool isManualEpid;
         private readonly bool isInputChanging;
         private readonly object lookupLockObject = new object();
-        //private static readonly int[] knownBuildNumbers = { 3790, 6000, 6001, 6002, 7600, 7601, 9200, 9600, 10240, 14393, 15063, 16299, 17134, 17763 };
 
         public static IList<PKeyConfigFile> PKeyConfigFiles = new List<PKeyConfigFile>
         {
@@ -260,23 +241,23 @@ namespace HGM.Hotbird64.LicenseManager
             GroupBoxProductTree.Visibility = Visibility.Visible;
             EpidInput.Visibility = Visibility.Collapsed;
 
-            var rootItem = new TreeViewItem { Header = "All SKUs by PkConfig file" };
+            TreeViewItem rootItem = new TreeViewItem { Header = "All SKUs by PkConfig file" };
 
             {
-                var treeGroupings = KeyConfigs.GroupBy(c => c.Source);
+                IEnumerable<IGrouping<IPKeyConfigFile, ProductKeyConfigurationConfigurationsConfiguration>> treeGroupings = KeyConfigs.GroupBy(c => c.Source);
 
-                foreach (var treeGrouping in treeGroupings.OrderBy(t => t.Key.DisplayName))
+                foreach (IGrouping<IPKeyConfigFile, ProductKeyConfigurationConfigurationsConfiguration> treeGrouping in treeGroupings.OrderBy(t => t.Key.DisplayName))
                 {
-                    var pKeyConfigItem = new TreeViewItem { Header = treeGrouping.Key.DisplayName, };
-                    var licenseGroupings = treeGrouping.GroupBy(t => t.ProductKeyType);
+                    TreeViewItem pKeyConfigItem = new TreeViewItem { Header = treeGrouping.Key.DisplayName, };
+                    IEnumerable<IGrouping<string, ProductKeyConfigurationConfigurationsConfiguration>> licenseGroupings = treeGrouping.GroupBy(t => t.ProductKeyType);
 
-                    foreach (var licenseGrouping in licenseGroupings)
+                    foreach (IGrouping<string, ProductKeyConfigurationConfigurationsConfiguration> licenseGrouping in licenseGroupings)
                     {
-                        var licenseItem = new TreeViewItem { Header = licenseGrouping.Key, };
+                        TreeViewItem licenseItem = new TreeViewItem { Header = licenseGrouping.Key, };
 
-                        foreach (var product in licenseGrouping)
+                        foreach (ProductKeyConfigurationConfigurationsConfiguration product in licenseGrouping)
                         {
-                            var productItem = new TreeViewItem { Header = product, };
+                            TreeViewItem productItem = new TreeViewItem { Header = product, };
                             licenseItem.Items.Add(productItem);
                         }
 
@@ -292,15 +273,15 @@ namespace HGM.Hotbird64.LicenseManager
             rootItem = new TreeViewItem { Header = "All SKUs by Group ID" };
 
             {
-                var treeGroupings = KeyConfigs.GroupBy(c => c.RefGroupId).OrderBy(c => c.Key);
+                IOrderedEnumerable<IGrouping<int, ProductKeyConfigurationConfigurationsConfiguration>> treeGroupings = KeyConfigs.GroupBy(c => c.RefGroupId).OrderBy(c => c.Key);
 
-                foreach (var treeGrouping in treeGroupings)
+                foreach (IGrouping<int, ProductKeyConfigurationConfigurationsConfiguration> treeGrouping in treeGroupings)
                 {
-                    var pKeyConfigItem = new TreeViewItem { Header = $"{treeGrouping.Key:00000}", };
+                    TreeViewItem pKeyConfigItem = new TreeViewItem { Header = $"{treeGrouping.Key:00000}", };
 
-                    foreach (var product in treeGrouping)
+                    foreach (ProductKeyConfigurationConfigurationsConfiguration product in treeGrouping)
                     {
-                        var productItem = new TreeViewItem { Header = product, };
+                        TreeViewItem productItem = new TreeViewItem { Header = product, };
                         pKeyConfigItem.Items.Add(productItem);
                     }
 
@@ -312,7 +293,7 @@ namespace HGM.Hotbird64.LicenseManager
 
             rootItem = new TreeViewItem { Header = "CSVLK SKUs only" };
 
-            foreach (var csvlkConfig in MainWindow.CsvlkConfigs.OrderBy(c => c.ToString()))
+            foreach (ProductKeyConfigurationConfigurationsConfiguration csvlkConfig in MainWindow.CsvlkConfigs.OrderBy(c => c.ToString()))
             {
                 rootItem.Items.Add(new TreeViewItem { Header = csvlkConfig, });
             }
@@ -322,7 +303,7 @@ namespace HGM.Hotbird64.LicenseManager
         }
 
         [NotifyPropertyChangedInvocator]
-        public void NotifyOfPropertyChange([CallerMemberName]string propertyName = null)
+        public void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         private void OnMainWindowStatusChange(object sender, BusyEventArgs e)
@@ -337,11 +318,11 @@ namespace HGM.Hotbird64.LicenseManager
                 return;
             }
 
-            var fileNames = Directory.EnumerateFiles(App.ExeDirectoryName, "*.xrm-ms").ToList();
+            List<string> fileNames = Directory.EnumerateFiles(App.ExeDirectoryName, "*.xrm-ms").ToList();
             fileNames.AddRange(Directory.EnumerateFiles(App.ExeDirectoryName, "*.xrm-ms.gz"));
             fileNames = new List<string>(fileNames.OrderByDescending(f => f));
 
-            foreach (var fileName in fileNames)
+            foreach (string fileName in fileNames)
             {
                 PKeyConfigFiles.Insert(0, new PKeyConfigFile
                 {
@@ -354,7 +335,7 @@ namespace HGM.Hotbird64.LicenseManager
                 {
                     while (true)
                     {
-                        var upperName = name.ToUpperInvariant();
+                        string upperName = name.ToUpperInvariant();
 
                         if (!upperName.EndsWith(".GZ") && !upperName.EndsWith(".XRM-MS"))
                         {
@@ -366,7 +347,7 @@ namespace HGM.Hotbird64.LicenseManager
                 }
             }
 
-            foreach (var pKeyConfigFile in PKeyConfigFiles)
+            foreach (PKeyConfigFile pKeyConfigFile in PKeyConfigFiles)
             {
                 if (ReferenceEquals(pKeyConfigFile, PKeyConfigFiles.First()))
                 {
@@ -381,23 +362,23 @@ namespace HGM.Hotbird64.LicenseManager
 
         private static void AddPkeyConfig(PKeyConfigFile pKeyConfigFile)
         {
-            var pKeyConfig = ReadPkeyConfig(pKeyConfigFile);
+            ProductKeyConfiguration pKeyConfig = ReadPkeyConfig(pKeyConfigFile);
 
             ISet<ProductKeyConfigurationConfigurationsConfiguration> keyConfigs = ((ProductKeyConfigurationConfigurations)pKeyConfig.Items.Single(i => i is ProductKeyConfigurationConfigurations)).Configuration;
             ISet<ProductKeyConfigurationPublicKeysPublicKey> publicKeys = ((ProductKeyConfigurationPublicKeys)pKeyConfig.Items.Single(i => i is ProductKeyConfigurationPublicKeys)).PublicKey;
             ISet<ProductKeyConfigurationKeyRangesKeyRange> keyRanges = ((ProductKeyConfigurationKeyRanges)pKeyConfig.Items.Single(i => i is ProductKeyConfigurationKeyRanges)).KeyRange;
 
-            foreach (var keyConfig in keyConfigs)
+            foreach (ProductKeyConfigurationConfigurationsConfiguration keyConfig in keyConfigs)
             {
                 KeyConfigs.Add(keyConfig);
             }
 
-            foreach (var publicKey in publicKeys)
+            foreach (ProductKeyConfigurationPublicKeysPublicKey publicKey in publicKeys)
             {
                 PublicKeys.Add(publicKey);
             }
 
-            foreach (var keyRange in keyRanges)
+            foreach (ProductKeyConfigurationKeyRangesKeyRange keyRange in keyRanges)
             {
                 KeyRanges.Add(keyRange);
             }
@@ -408,7 +389,7 @@ namespace HGM.Hotbird64.LicenseManager
         {
             using
             (
-                var stream = !pKeyConfigFile.IsExternal
+                Stream stream = !pKeyConfigFile.IsExternal
                     ? Application.GetResourceStream(pKeyConfigFile.Uri).Stream
                     : new FileStream(pKeyConfigFile.ExternalFileName, FileMode.Open, FileAccess.Read, FileShare.Read)
             )
@@ -422,17 +403,17 @@ namespace HGM.Hotbird64.LicenseManager
                         : null
                 )
                 {
-                    var xmlDocument = new XmlDocument();
+                    XmlDocument xmlDocument = new XmlDocument();
                     xmlDocument.Load(unzipStream ?? stream);
 
                     try
                     {
-                        var data = Convert.FromBase64String(xmlDocument
+                        byte[] data = Convert.FromBase64String(xmlDocument
                             .SelectSingleNode("/*[local-name()='licenseGroup']/*[local-name()='license']/*[local-name()='otherInfo']/*[local-name()='infoTables']/*[local-name()='infoList']/*[@name='pkeyConfigData']").InnerText);
 
-                        using (var memoryStream = new MemoryStream(data))
+                        using (MemoryStream memoryStream = new MemoryStream(data))
                         {
-                            var serializer = new XmlSerializer(typeof(ProductKeyConfiguration));
+                            XmlSerializer serializer = new XmlSerializer(typeof(ProductKeyConfiguration));
                             pKeyConfig = (ProductKeyConfiguration)serializer.Deserialize(memoryStream);
                         }
                     }
@@ -457,7 +438,7 @@ namespace HGM.Hotbird64.LicenseManager
 
                 Parallel.ForEach(pKeyConfig.Items.OfType<ProductKeyConfigurationKeyRanges>().Single().KeyRange, keyRange =>
                 {
-                        keyRange.FileName = pKeyConfigFile.DisplayName;
+                    keyRange.FileName = pKeyConfigFile.DisplayName;
                 });
 
                 return pKeyConfig;
@@ -532,14 +513,14 @@ namespace HGM.Hotbird64.LicenseManager
                 }
             });
 
-            var publicKey = PublicKeys.FirstOrDefault(p => keyConfig.RefGroupId == p.GroupId);
+            ProductKeyConfigurationPublicKeysPublicKey publicKey = PublicKeys.FirstOrDefault(p => keyConfig.RefGroupId == p.GroupId);
             if (publicKey == null)
             {
                 return;
             }
 
-            var lic = keyConfig.ProductKeyType.Split(':')[0].ToUpperInvariant();
-            var platformId = lic == "RETAIL" ? "00" : lic == "VOLUME" ? "03" : lic == "OEM" ? "02" : "XX";
+            string lic = keyConfig.ProductKeyType.Split(':')[0].ToUpperInvariant();
+            string platformId = lic == "RETAIL" ? "00" : lic == "VOLUME" ? "03" : lic == "OEM" ? "02" : "XX";
 
             Dispatcher.Invoke(() =>
             {
@@ -550,7 +531,7 @@ namespace HGM.Hotbird64.LicenseManager
 
                 try
                 {
-                    var csvlkRule = KmsLists.CsvlkItemList[keyConfig.ActConfigGuid];
+                    CsvlkItem csvlkRule = KmsLists.CsvlkItemList[keyConfig.ActConfigGuid];
                     DataGridCsvlk.ItemsSource = csvlkRule.Activates.Select(r => KmsLists.KmsItemList[r.Guid]).Where(k => k != null).OrderBy(k => k.DisplayName);
                     GroupBoxCsvlk.Visibility = Visibility.Visible;
                 }
@@ -601,7 +582,7 @@ namespace HGM.Hotbird64.LicenseManager
                 return;
             }
 
-            var keyRange = (DataGridRanges?.SelectedCells.FirstOrDefault())?.Item as ProductKeyConfigurationKeyRangesKeyRange ??
+            ProductKeyConfigurationKeyRangesKeyRange keyRange = (DataGridRanges?.SelectedCells.FirstOrDefault())?.Item as ProductKeyConfigurationKeyRangesKeyRange ??
                            (DataGridRanges != null && DataGridRanges.HasItems ? DataGridRanges.Items[0] as ProductKeyConfigurationKeyRangesKeyRange : null);
 
             if (keyRange == null)
@@ -617,7 +598,7 @@ namespace HGM.Hotbird64.LicenseManager
                 return;
             }
 
-            var randomId = random.Next(keyRange.Start, keyRange.End + 1);
+            int randomId = random.Next(keyRange.Start, keyRange.End + 1);
             TextBoxKeyId1.Text = $"{randomId / 1000000:000}";
             TextBoxKeyId2.Text = $"{randomId % 1000000:000000}";
             GroupBoxGenerated.Visibility = Visibility.Collapsed;
@@ -649,13 +630,13 @@ namespace HGM.Hotbird64.LicenseManager
 
             if (!Equals(TextBoxKeyId1.Background, Brushes.OrangeRed) && !Equals(TextBoxKeyId2.Background, Brushes.OrangeRed))
             {
-                var left = uint.Parse(TextBoxKeyId1.Text);
-                var right = uint.Parse(TextBoxKeyId2.Text);
-                var keyId = left * 1000000 + right;
+                uint left = uint.Parse(TextBoxKeyId1.Text);
+                uint right = uint.Parse(TextBoxKeyId2.Text);
+                uint keyId = left * 1000000 + right;
 
                 if (keyRanges != null)
                 {
-                    foreach (var keyRange in keyRanges)
+                    foreach (ProductKeyConfigurationKeyRangesKeyRange keyRange in keyRanges)
                     {
                         if (keyId >= keyRange.Start && keyId <= keyRange.End)
                         {
@@ -716,18 +697,18 @@ namespace HGM.Hotbird64.LicenseManager
                 }
             }
 
-            var keys = new string[10];
+            string[] keys = new string[10];
 
-            for (var i = 0; i < keys.Length; i++)
+            for (int i = 0; i < keys.Length; i++)
             {
-                var left = uint.Parse(TextBoxKeyId1.Text);
-                var right = uint.Parse(TextBoxKeyId2.Text);
-                var keyId = left * 1000000 + right;
+                uint left = uint.Parse(TextBoxKeyId1.Text);
+                uint right = uint.Parse(TextBoxKeyId2.Text);
+                uint keyId = left * 1000000 + right;
 
-                var randomSecret = (ulong)unchecked((uint)random.Next(int.MinValue, int.MaxValue));
+                ulong randomSecret = (ulong)unchecked((uint)random.Next(int.MinValue, int.MaxValue));
                 randomSecret |= (ulong)random.Next(0x200000) << 32;
 
-                var binaryKey = new BinaryProductKey((uint)keyConfig.RefGroupId, keyId, randomSecret);
+                BinaryProductKey binaryKey = new BinaryProductKey((uint)keyConfig.RefGroupId, keyId, randomSecret);
                 keys[i] = (string)binaryKey;
             }
 
@@ -737,7 +718,7 @@ namespace HGM.Hotbird64.LicenseManager
 
         private void InstallGenerated_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            var item = DataGridKeys.SelectedCells.FirstOrDefault().Item;
+            object item = DataGridKeys.SelectedCells.FirstOrDefault().Item;
             if (item == null)
             {
                 return;
@@ -832,7 +813,7 @@ namespace HGM.Hotbird64.LicenseManager
             SetReady();
             TextBoxGvlk.Visibility = Visibility.Collapsed;
             TextBoxKeyId1.Text = TextBoxKeyId2.Text = null;
-            var textBox = (TextBox)sender;
+            TextBox textBox = (TextBox)sender;
             ProductKeyConfigurationConfigurationsConfiguration localKeyConfig = null;
             InstallButton.Visibility = Visibility.Collapsed;
 
@@ -841,7 +822,7 @@ namespace HGM.Hotbird64.LicenseManager
                 StatusPanel.Visibility = Visibility.Collapsed;
                 InstallButton.Visibility = CheckButton.Visibility = Visibility.Collapsed;
                 TextBoxKeyId1.IsReadOnly = TextBoxKeyId2.IsReadOnly = true;
-                var epid = new EPid(textBox.Text);
+                EPid epid = new EPid(textBox.Text);
 
                 try
                 {
@@ -885,7 +866,7 @@ namespace HGM.Hotbird64.LicenseManager
                 StatusPanel.Visibility = Visibility.Collapsed;
                 CheckButton.Visibility = InstallButton.Visibility = Visibility.Collapsed;
                 TextBoxKeyId1.IsReadOnly = TextBoxKeyId2.IsReadOnly = false;
-                var guid = new KmsGuid(textBox.Text);
+                KmsGuid guid = new KmsGuid(textBox.Text);
 
                 await Task.Run(() =>
                 {
@@ -900,8 +881,8 @@ namespace HGM.Hotbird64.LicenseManager
                     textBox.Background = Brushes.Yellow;
                     TextBlockInputErrors.Visibility = Visibility.Visible;
 
-                    var kmsItem = KmsLists.KmsItemList.FirstOrDefault(k => k.Guid == guid);
-                    var appItem = KmsLists.AppItemList.FirstOrDefault(a => a.Guid == guid);
+                    KmsItem kmsItem = KmsLists.KmsItemList.FirstOrDefault(k => k.Guid == guid);
+                    AppItem appItem = KmsLists.AppItemList.FirstOrDefault(a => a.Guid == guid);
 
                     if (kmsItem != null)
                     {
@@ -1008,21 +989,21 @@ namespace HGM.Hotbird64.LicenseManager
         private async void Button_Check_Click(object sender, RoutedEventArgs e)
         {
             TextBlockInputErrors.Text = null;
-            var key = (BinaryProductKey)TextBoxEpidInput.Text;
+            BinaryProductKey key = (BinaryProductKey)TextBoxEpidInput.Text;
             ProductKeyConfigurationConfigurationsConfiguration localKeyConfig;
 
             //DigitalProductId2 id2;
             //DigitalProductId3 id3;
-            var id4 = default(DigitalProductId4);
+            DigitalProductId4 id4 = default(DigitalProductId4);
 
-            var oldPKeyConfigFiles = PKeyConfigFiles.Where(f => f.IsOldKeyFormat).ToArray();
+            PKeyConfigFile[] oldPKeyConfigFiles = PKeyConfigFiles.Where(f => f.IsOldKeyFormat).ToArray();
             SetBusy("Querying PidGenX.dll");
 
             try
             {
                 CheckButton.Visibility = Visibility.Collapsed;
 
-                foreach (var pkeyConfigFile in oldPKeyConfigFiles)
+                foreach (PKeyConfigFile pkeyConfigFile in oldPKeyConfigFiles)
                 {
                     try
                     {
@@ -1042,8 +1023,8 @@ namespace HGM.Hotbird64.LicenseManager
                     }
                 }
 
-                var split = id4.EPid.Split('-');
-                var keyId = uint.Parse(split[2] + split[3]);
+                string[] split = id4.EPid.Split('-');
+                uint keyId = uint.Parse(split[2] + split[3]);
                 TextBlockInputErrors.Visibility = Visibility.Collapsed;
                 TextBoxEpidInput.Background = Brushes.LightGreen;
 
@@ -1100,9 +1081,6 @@ namespace HGM.Hotbird64.LicenseManager
 
         private void CheckBoxHideInput_Click(object sender, RoutedEventArgs e)
         {
-#if DEBUG
-            Debug.Assert(CheckBoxHideInput.IsChecked != null, "CheckBoxHideInput.IsChecked != null");
-#endif
             if (CheckBoxHideInput.IsChecked.Value)
             {
                 PassWordBoxEpidInput.Visibility = Visibility.Visible;
@@ -1123,7 +1101,7 @@ namespace HGM.Hotbird64.LicenseManager
         {
             try
             {
-                var activationsRemaining = 0;
+                int activationsRemaining = 0;
                 IsEnabled = false;
 
                 try

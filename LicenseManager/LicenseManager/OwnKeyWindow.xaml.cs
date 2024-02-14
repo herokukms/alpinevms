@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using HGM.Hotbird64.LicenseManager.Extensions;
-using HGM.Hotbird64.Vlmcs;
 using Microsoft.Win32;
+using HGM.Hotbird64.Vlmcs;
+using System.Globalization;
+using System.Windows.Input;
+using System.Windows.Controls;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
+using HGM.Hotbird64.LicenseManager.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace HGM.Hotbird64.LicenseManager
 {
     public partial class OwnKeyWindow
@@ -72,14 +73,14 @@ namespace HGM.Hotbird64.LicenseManager
             InitializeComponent();
             TopElement.LayoutTransform = Scaler;
 
-            var productKeyList = new List<KeyListItem>();
+            List<KeyListItem> productKeyList = new List<KeyListItem>();
 
-            using (var sysKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess ? RegistryView.Registry64 : RegistryView.Default))
+            using (RegistryKey sysKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess ? RegistryView.Registry64 : RegistryView.Default))
             {
                 DigitalProductId4 id4;
                 DigitalProductId3 id3;
 
-                using (var registryKey = sysKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                using (RegistryKey registryKey = sysKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
                 {
                     if (registryKey != null)
                     {
@@ -99,9 +100,9 @@ namespace HGM.Hotbird64.LicenseManager
                     }
                 }
 
-                foreach (var windowsItem in alternateWindowsList)
+                foreach (HiveItem windowsItem in alternateWindowsList)
                 {
-                    using (var registryKey = sysKey.OpenSubKey(windowsItem.HiveName))
+                    using (RegistryKey registryKey = sysKey.OpenSubKey(windowsItem.HiveName))
                     {
                         if (registryKey != null)
                         {
@@ -122,13 +123,13 @@ namespace HGM.Hotbird64.LicenseManager
                     }
                 }
 
-                using (var regKey = sysKey.OpenSubKey(@"SYSTEM\Setup"))
+                using (RegistryKey regKey = sysKey.OpenSubKey(@"SYSTEM\Setup"))
                 {
                     if (regKey != null)
                     {
-                        foreach (var subKeyName in regKey.GetSubKeyNames().Where(n => n.StartsWith("Source OS")))
+                        foreach (string subKeyName in regKey.GetSubKeyNames().Where(n => n.StartsWith("Source OS")))
                         {
-                            using (var subKey = regKey.OpenSubKey(subKeyName))
+                            using (RegistryKey subKey = regKey.OpenSubKey(subKeyName))
                             {
                                 GetProductIds(subKey, out id3, out id4, isOffice: false);
                                 if (id4.size != sizeof(DigitalProductId4) && id3.size != sizeof(DigitalProductId3))
@@ -152,18 +153,18 @@ namespace HGM.Hotbird64.LicenseManager
                     }
                 }
 
-                foreach (var officeItem in officeList)
+                foreach (HiveItem officeItem in officeList)
                 {
-                    using (var registryKey = sysKey.OpenSubKey(officeItem.HiveName))
+                    using (RegistryKey registryKey = sysKey.OpenSubKey(officeItem.HiveName))
                     {
                         if (registryKey == null)
                         {
                             continue;
                         }
 
-                        foreach (var subKeyName in registryKey.GetSubKeyNames())
+                        foreach (string subKeyName in registryKey.GetSubKeyNames())
                         {
-                            using (var subKey = registryKey.OpenSubKey(subKeyName))
+                            using (RegistryKey subKey = registryKey.OpenSubKey(subKeyName))
                             {
                                 GetProductIds(subKey, out id3, out id4, isOffice: true);
                                 if (id4.size != sizeof(DigitalProductId4))
@@ -187,11 +188,11 @@ namespace HGM.Hotbird64.LicenseManager
                     }
                 }
 
-                foreach (var sqlServerItem in sqlServerList)
+                foreach (HiveItem sqlServerItem in sqlServerList)
                 {
-                    using (var registryKey = sysKey.OpenSubKey(sqlServerItem.HiveName))
+                    using (RegistryKey registryKey = sysKey.OpenSubKey(sqlServerItem.HiveName))
                     {
-                        var bytes = registryKey?.GetValue("DigitalProductId");
+                        object bytes = registryKey?.GetValue("DigitalProductId");
                         if (!(bytes is byte[]) || ((byte[])bytes).Length != 16)
                         {
                             continue;
@@ -214,14 +215,17 @@ namespace HGM.Hotbird64.LicenseManager
             DataGridKeys.ItemsSource = productKeyList.OrderBy(p => p.InstallDate);
         }
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern uint GetSystemFirmwareTable(uint firmwareTableProviderSignature, uint firmwareTableID, IntPtr firmwareTableBuffer, uint bufferSize);
+
         private void InstallKey_CanExecute(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = IsKeyInCurrentCell();
 
         private bool IsKeyInCurrentCell()
         {
-            var cell = DataGridKeys.SelectedCells.FirstOrDefault();
+            DataGridCellInfo cell = DataGridKeys.SelectedCells.FirstOrDefault();
 
-            var cellValue = cell.Item.GetType().GetProperties().Single(p => p.Name == cell.Column.SortMemberPath).GetValue(cell.Item);
-            var binaryKey = default(BinaryProductKey);
+            object cellValue = cell.Item.GetType().GetProperties().Single(p => p.Name == cell.Column.SortMemberPath).GetValue(cell.Item);
+            BinaryProductKey binaryKey = default(BinaryProductKey);
             if (cellValue is DigitalProductId3 || cellValue is DigitalProductId4)
             {
                 binaryKey = ((dynamic)cellValue).BinaryKey;
@@ -232,8 +236,8 @@ namespace HGM.Hotbird64.LicenseManager
 
         private void InstallKey_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            var cell = DataGridKeys.SelectedCells.FirstOrDefault();
-            var cellValue = cell.Item.GetType().GetProperties().Single(p => p.Name == cell.Column.SortMemberPath).GetValue(cell.Item);
+            DataGridCellInfo cell = DataGridKeys.SelectedCells.FirstOrDefault();
+            object cellValue = cell.Item.GetType().GetProperties().Single(p => p.Name == cell.Column.SortMemberPath).GetValue(cell.Item);
             new ProductBrowser(MainWindow, cellValue.ToString()).Show();
         }
 
