@@ -14,17 +14,6 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Setup MSVC v141_xp
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        toolset: "14.16.27023"
-        arch: x64
-        sdk: "7.1A"
-
-    - name: Install xp tools
-      run: |
-        &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe" modify --add Microsoft.VisualStudio.Component.WinXP --quiet --installPath " C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-
     - name: Build solution
       run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
 
