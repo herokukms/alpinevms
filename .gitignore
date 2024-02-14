@@ -19,3 +19,4 @@ VisualStudio/libkms/ARM
 VisualStudio/vlmcs/ARM
 VisualStudio/vlmcs/x64
 .DS_Store
+VisualStudio/.vs
