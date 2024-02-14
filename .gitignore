@@ -5,7 +5,6 @@ floppy/
 hotbird64-mass-build/
 lib/
 src/VisualStudio-Linux-Remote/
-*.vcxproj*
 *.html
 *.pdf
 *.txt
@@ -19,3 +18,4 @@ VisualStudio/libkms/x64
 VisualStudio/libkms/ARM
 VisualStudio/vlmcs/ARM
 VisualStudio/vlmcs/x64
+.DS_Store
