@@ -1,0 +1,19 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Platforms\x64\PlatformToolsets\v141_xp\Toolset.targets(39,5): warning MSB8051: La prise en charge du ciblage de Windows XP est dépréciée et sera absente des futures versions de Visual Studio. Pour plus d'informations, consultez https://go.microsoft.com/fwlink/?linkid=2023588.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Le répertoire Output ne se termine pas par une barre oblique finale. Cette instance de build ajoutera une barre oblique, comme requis, pour permettre l'évaluation correcte du répertoire Output.
+  crypto.c
+  crypto_windows.c
+  endian.c
+  helpers.c
+  kms.c
+  libkms.c
+  network.c
+  output.c
+  rpc.c
+  shared_globals.c
+  vlmcs.c
+LINK : warning LNK4075: ' /INCREMENTAL' ignoré à cause de la spécification '/LTCG'
+     Création de la bibliothèque x64\Release\libkms64.lib et de l'objet x64\Release\libkms64.exp
+  Génération de code en cours
+  All 85 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Fin de la génération du code
+  libkms.vcxproj -> C:\Users\dev\source\repos\alpinevms\VisualStudio\..\bin\libkms64.dll

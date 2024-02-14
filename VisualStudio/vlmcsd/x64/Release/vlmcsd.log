@@ -1,0 +1,30 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v150\Platforms\x64\PlatformToolsets\v141_xp\Toolset.targets(39,5): warning MSB8051: La prise en charge du ciblage de Windows XP est dépréciée et sera absente des futures versions de Visual Studio. Pour plus d'informations, consultez https://go.microsoft.com/fwlink/?linkid=2023588.
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v150\Microsoft.CppBuild.targets(377,5): warning MSB8004: Le répertoire Output ne se termine pas par une barre oblique finale. Cette instance de build ajoutera une barre oblique, comme requis, pour permettre l'évaluation correcte du répertoire Output.
+  crypto.c
+  crypto_windows.c
+  endian.c
+  helpers.c
+  kms.c
+  kmsdata.c
+  mongoose.c
+  network.c
+C:\Users\dev\source\repos\alpinevms\src\mongoose.c(7143): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+C:\Users\dev\source\repos\alpinevms\src\mongoose.c(7146): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+C:\Users\dev\source\repos\alpinevms\src\mongoose.c(7264): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+C:\Users\dev\source\repos\alpinevms\src\mongoose.c(7267): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+C:\Users\dev\source\repos\alpinevms\src\mongoose.c(7687): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+  ntservice.c
+  output.c
+  rpc.c
+  shared_globals.c
+  vlmcsd.c
+  web.c
+  wingetopt.c
+  wintap.c
+C:\Users\dev\source\repos\alpinevms\src\vlmcsd.c(2039): warning C4267: 'initialisation' : conversion de 'size_t' en 'const int', perte possible de données
+  crypto.obj : .netmodule ou module MSIL compilé avec /GL trouvé ; redémarrage de l'édition de liens avec /LTCG ; ajoutez /LTCG à la ligne de commande de l'édition de liens pour améliorer les performances de l'Éditeur de liens
+LINK : warning LNK4075: ' /INCREMENTAL' ignoré à cause de la spécification '/LTCG'
+LINK : warning LNK4098: conflit entre la bibliothèque par défaut 'LIBCMT' et les autres bibliothèques ; utilisez /NODEFAULTLIB:library
+  Génération de code en cours
+  Fin de la génération du code
+  vlmcsd.vcxproj -> C:\Users\dev\source\repos\alpinevms\VisualStudio\\..\bin\vlmcsd.exe
