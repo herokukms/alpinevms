@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build with visual studio
 
 on:
   workflow_dispatch:
