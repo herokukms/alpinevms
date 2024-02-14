@@ -11,3 +11,11 @@ src/VisualStudio-Linux-Remote/
 *.txt
 .vscode/settings.json
 .vscode/launch.json
+VisualStudio/vlmcsdmulti/x64
+VisualStudio/vlmcsdmulti/ARM
+VisualStudio/vlmcsd/ARM
+VisualStudio/vlmcsd/x64
+VisualStudio/libkms/x64
+VisualStudio/libkms/ARM
+VisualStudio/vlmcs/ARM
+VisualStudio/vlmcs/x64
