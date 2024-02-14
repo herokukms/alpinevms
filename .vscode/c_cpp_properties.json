@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include/x86_64-linux-gnu"
+            ],
+            "defines": [
+                "LOG_TO_MONGODB=1",
+                "USE_THREADS=1"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "compilerPath": "/usr/bin/gcc"
+        }
+    ],
+    "version": 4
+}
