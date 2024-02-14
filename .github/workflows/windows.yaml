@@ -19,6 +19,7 @@ jobs:
       with:
         toolset: 14.16
         arch: x64
+        sdk: 7.1a
 
     - name: Build solution
       run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
