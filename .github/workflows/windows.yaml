@@ -19,8 +19,10 @@ jobs:
       with:
         toolset: 14.16
         arch: x64
+        sdk: 7.1
+
     - name: Install xp tools
-      run: \"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe\" modify --add Microsoft.VisualStudio.Component.WinXP --quiet --installPath \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\"
+      run: "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe modify --add Microsoft.VisualStudio.Component.WinXP --quiet --installPath C:\\Program Files\\Microsoft Visual Studio\\2019\\BuildTools"
 
     - name: Build solution
       run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
