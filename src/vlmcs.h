@@ -8,6 +8,12 @@
 
 #if !defined(USE_MSRPC) && defined(_WIN32)
 #include <winsock2.h>
+#include <ws2tcpip.h>
+
+//
+//#include <windows.h>
+//#include <iphlpapi.h>
+
 #endif // defined(USE_MSRPC) && defined(_WIN32)
 #include "types.h"
 #ifndef USE_MSRPC

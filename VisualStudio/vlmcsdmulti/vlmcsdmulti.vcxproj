@@ -38,7 +38,7 @@
     <ProjectGuid>{7F07671D-1432-43E9-9D72-08435F216B5E}</ProjectGuid>
     <RootNamespace>vlmcsdmulti-Windows</RootNamespace>
     <ProjectName>vlmcsdmulti-Windows</ProjectName>
-    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -101,7 +101,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -442,7 +442,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>_USING_V110_SDK71_;%(PreprocessorDefinitions);_CRYPTO_WINDOWS;MULTI_CALL_BINARY=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NO_TAP;WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0A00;_CRYPTO_WINDOWS;MULTI_CALL_BINARY=1</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

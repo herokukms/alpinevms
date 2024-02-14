@@ -37,7 +37,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2A0FC04D-C3C0-43E2-8812-53AE901C5395}</ProjectGuid>
     <RootNamespace>vlmcsdmulti-Windows</RootNamespace>
-    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>libkms-Windows</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -101,7 +101,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -471,7 +471,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>_USING_V110_SDK71_;%(PreprocessorDefinitions);_CRYPTO_WINDOWS;SIMPLE_SOCKETS;NO_TIMEOUT;NO_SIGHUP;NO_CL_PIDS;NO_EXTENDED_PRODUCT_LIST;NO_BASIC_PRODUCT_LIST;NO_LOG;NO_RANDOM_EPID;NO_INI_FILE;NO_HELP;NO_CUSTOM_INTERVALS;NO_PID_FILE;NO_USER_SWITCH;NO_VERBOSE_LOG;NO_LIMIT;NO_VERSION_INFORMATION;NO_PRIVATE_IP_DETECT;IS_LIBRARY=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0A00;_CRYPTO_WINDOWS;SIMPLE_SOCKETS;NO_TIMEOUT;NO_SIGHUP;NO_CL_PIDS;NO_EXTENDED_PRODUCT_LIST;NO_BASIC_PRODUCT_LIST;NO_LOG;NO_RANDOM_EPID;NO_INI_FILE;NO_HELP;NO_CUSTOM_INTERVALS;NO_PID_FILE;NO_USER_SWITCH;NO_VERBOSE_LOG;NO_LIMIT;NO_VERSION_INFORMATION;NO_PRIVATE_IP_DETECT;IS_LIBRARY=1</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
