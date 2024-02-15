@@ -1,0 +1,8 @@
+{
+  "name": "heroku deploy Sample",
+  "description": "vlmcsd app using Express",
+  "repository": "https://github.com/tagma067001068/vlmcsd",
+  "stack": "container",
+  "logo": "https://avatars.githubusercontent.com/u/16551275?s=40&v=4",
+  "keywords": ["node", "express", "static"]
+}

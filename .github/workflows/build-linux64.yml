@@ -1,0 +1,45 @@
+name: Build for Linux64
+
+on: [push]
+  # workflow_dispatch:
+  #   inputs:
+  #     logLevel:
+  #       description: 'Log level'
+  #       required: true
+  #       default: 'warning'
+  #       type: choice
+  #       options:
+  #       - info
+  #       - warning
+  #       - debug
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-linux64:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Add libs
+        run: sudo apt update && sudo apt install -y libcurl4-openssl-dev zip 
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Build linux64 executables
+        run: CFLAGS="-I/usr/include/x86_64-linux-gnu/" ./build-forlinux64
+      - name: Zip binaries
+        run: zip --junk-paths vlmcs bin/vlmcs bin/vlmcsd
+      - name: Create Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: nightly-linux64-${{ steps.date.outputs.date }}
+          prerelease: false
+          title: "Linux 64"
+          files: |
+            vlmcs.zip

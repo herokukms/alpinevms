@@ -1,0 +1,14 @@
+#!/bin/sh
+MONGODB_PARTIAL_KEY=`echo $MONGODB_API_KEY | md5sum`
+echo $SSH_MANAGEMENT_KEY > /root/.ssh/authorized_keys
+echo "for managing use the private key corresponding to:" 
+echo $SSH_MANAGEMENT_KEY
+echo "using MONGO API: $MONGODB_API_URL"
+echo "using MONGO KEY(md5): $MONGODB_PARTIAL_KEY "
+ulimit -c unlimited
+chmod u+x /root/.ssh/authorized_keys
+mkdir -p /run/openrc/
+touch /run/openrc/softlevel 
+/usr/sbin/sshd -D -p 2222 -d &
+/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -v
+#/usr/bin/vlmcsd -D -d -e -H 20348 -C 1036 -X $MONGODB_API_URL -Y $MONGODB_API_KEY -v

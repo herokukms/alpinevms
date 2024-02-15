@@ -1,0 +1,39 @@
+name: Build with visual studio
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup Windows 10 SDK
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      with:
+        sdk-version: 19041
+    - name: Build solution
+      run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
+
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+    - name: Zip release
+      run: Compress-Archive -Path bin/v* -DestinationPath ./release.zip
+
+    - name: Create Release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: nightly-w64-vs2022-${{ steps.date.outputs.date }}
+        prerelease: false
+        title: "Windows 64 (visual studio build)"
+        files: |
+          release.zip

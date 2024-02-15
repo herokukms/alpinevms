@@ -1,0 +1,44 @@
+name: Build for W64
+
+on: [push]
+  # workflow_dispatch:
+  #   inputs:
+  #     logLevel:
+  #       description: 'Log level'
+  #       required: true
+  #       default: 'warning'
+  #       type: choice
+  #       options:
+  #       - info
+  #       - warning
+  #       - debug
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-w64:
+    runs-on: ubuntu-latest
+    container: highcanfly/ubuntu-w64
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Build w64 executables
+        run: CFLAGS="-I/usr/include/x86_64-linux-gnu -static -static-libgcc" ./build-forwindows64
+      - name: Zip binaries
+        run: zip --junk-paths vlmcs bin/vlmcs.exe bin/vlmcsd.exe
+      - name: Create Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: nightly-w64-${{ steps.date.outputs.date }}
+          prerelease: false
+          title: "Windows 64"
+          files: |
+            vlmcs.zip

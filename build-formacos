@@ -1,0 +1,3 @@
+#!/bin/sh
+make clean
+VERBOSE=1 CC=clang CFLAGS="$CFLAGS -DFULL_INTERNAL_DATA" LDFLAGS="-lcurl" DNS_PARSER=internal make -j1
