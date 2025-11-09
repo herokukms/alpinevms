@@ -123,19 +123,19 @@ jobs:
       - name: Attest binaries
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: 'bin/vlmcs-x86_64,bin/vlmcsd-x86_64,bin/vlmcs-arm64,bin/vlmcsd-arm64'
+          subject-path: 'vlmcs-x86_64,vlmcsd-x86_64,vlmcs-arm64,vlmcsd-arm64'
       - name: Zip Intel binaries
-        run: zip --junk-paths vlmcs-macos-x86_64.zip bin/vlmcs-x86_64 bin/vlmcsd-x86_64
+        run: zip --junk-paths vlmcs-macos-x86_64.zip vlmcs-x86_64 vlmcsd-x86_64
       - name: Attest Intel zip
         uses: actions/attest-build-provenance@v1
         with:
           subject-path: 'vlmcs-macos-x86_64.zip'
       - name: Zip ARM64 binaries
-        run: zip --junk-paths vlmcs-macos-arm64.zip bin/vlmcs-arm64 bin/vlmcsd-arm64
-      - name: Attest Intel zip
+        run: zip --junk-paths vlmcs-macos-arm64.zip vlmcs-arm64 vlmcsd-arm64
+      - name: Attest ARM64 zip
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: 'vlmcs-macos-x86_64.zip'
+          subject-path: 'vlmcs-macos-arm64.zip'
       - name: Upload Intel artifact
         uses: actions/upload-artifact@v4
         with:
