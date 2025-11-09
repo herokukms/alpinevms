@@ -93,7 +93,7 @@
 #include "web.h"
 #endif // NO_MONGOOSE
 
-static const char *const optstring = "a:N:B:m:t:A:R:u:g:L:p:i:H:P:X:Y:l:r:U:W:C:c:F:O:o:x:T:K:E:M:j:SseDdVvqkZ";
+static const char *const optstring = "a:N:B:m:t:A:R:u:g:L:p:i:H:P:X:Y:l:r:U:W:C:c:F:O:o:x:T:K:E:M:j:SseDdVvfqkZ";
 
 #if !defined(NO_SOCKETS) && !defined(USE_MSRPC) && !defined(SIMPLE_SOCKETS)
 static uint_fast8_t maxsockets = 0;
@@ -384,6 +384,7 @@ static __noreturn void usage()
 #endif // NO_VERBOSE_LOG
 #endif // NO_LOG
 #ifndef NO_VERSION_INFORMATION
+				"  -f\t\t\tdisplay list of supported CSVLKs and exit\n"
 				"  -V\t\t\tdisplay version information and exit\n"
 #endif // NO_VERSION_INFORMATION
 				,
@@ -392,6 +393,21 @@ static __noreturn void usage()
 	exit(VLMCSD_EINVAL);
 }
 #endif // HELP
+
+static void printCsvlkList()
+{
+	int32_t i;
+
+	printf("Supported CSVLKs:\n");
+	for (i = 0; i < KmsData->CsvlkCount; i++)
+	{
+		const CsvlkData_t *const csvlk = KmsData->CsvlkData + i;
+		const char *csvlkIniName = getNextString(csvlk->EPid);
+		const char *csvlkFullName = getNextString(csvlkIniName);
+		csvlkFullName = *csvlkFullName ? csvlkFullName : "unknown";
+		printf("  %s (%s)\n", csvlkIniName, csvlkFullName);
+	}
+}
 
 #ifndef NO_CUSTOM_INTERVALS
 #if !defined(NO_INI_FILE)
@@ -1467,6 +1483,11 @@ static void parseGeneralArguments()
 #endif // !USE_MSRPC
 
 #ifndef NO_VERSION_INFORMATION
+		case 'f':
+			loadKmsData();
+			printCsvlkList();
+			exit(0);
+
 		case 'V':
 #ifdef _NTSERVICE
 			if (IsNTService)
@@ -2032,12 +2053,13 @@ int newmain()
 
 #ifndef NO_MONGOOSE
 	struct mg_mgr mgr;
-	mg_mgr_init(&mgr);											   // Init manager
+	mg_mgr_init(&mgr); // Init manager
 	mg_log_set(logverbose);
-	if (listen_params == NULL) listen_params = "0.0.0.0:8000";
+	if (listen_params == NULL)
+		listen_params = "0.0.0.0:8000";
 
 	const int listen_params_length = strlen(listen_params);
-	char* listener = malloc(strlen("http://") + listen_params_length + 1);
+	char *listener = malloc(strlen("http://") + listen_params_length + 1);
 	sprintf(listener, "http://%s", listen_params);
 	logger("Starting Mongoose on %s\n", listener);
 	mg_http_listen(&mgr, listener, handle_web, NULL); // Setup listener
@@ -2057,17 +2079,18 @@ int newmain()
 #endif
 
 #ifndef NO_MONGOOSE
-		pthread_join(thread, NULL);     // Wait for Mongoose thread to finish
-		mg_mgr_free(&mgr);				// Cleanup manager
-		free(listener);					// Free listener
-		free(listen_params);			// Free Mongoose parameters
-#endif								    // NO_MONGOOSE
+		pthread_join(thread, NULL); // Wait for Mongoose thread to finish
+		mg_mgr_free(&mgr);			// Cleanup manager
+		free(listener);				// Free listener
+		free(listen_params);		// Free Mongoose parameters
+#endif								// NO_MONGOOSE
 
-	cleanup();
+		cleanup();
 
 #ifdef _NTSERVICE
 	}
-	else ReportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
+	else
+		ReportServiceStatus(SERVICE_STOPPED, NO_ERROR, 0);
 #endif
 
 	return rc;
