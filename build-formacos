@@ -1,3 +1,12 @@
 #!/bin/sh
+# Build for Intel x86_64
 make clean
-VERBOSE=1 CC=clang CFLAGS="$CFLAGS -DFULL_INTERNAL_DATA" LDFLAGS="-lcurl" DNS_PARSER=internal make -j1
+VERBOSE=1 CC=clang CFLAGS="$CFLAGS -arch x86_64 -DFULL_INTERNAL_DATA" LDFLAGS="-lcurl" DNS_PARSER=internal make -j1
+mv bin/vlmcs bin/vlmcs-x86_64
+mv bin/vlmcsd bin/vlmcsd-x86_64
+
+# Build for Apple Silicon arm64
+make clean
+VERBOSE=1 CC=clang CFLAGS="$CFLAGS -arch arm64 -DFULL_INTERNAL_DATA" LDFLAGS="-lcurl" DNS_PARSER=internal make -j1
+mv bin/vlmcs bin/vlmcs-arm64
+mv bin/vlmcsd bin/vlmcsd-arm64
