@@ -37,7 +37,7 @@ jobs:
       with:
         winsdk-build-version: 17763
     - name: Build solution
-      run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
+      run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64 /t:vlmcsd-Windows /t:vlmcs-Windows /t:vlmcsdmulti-Windows /t:libkms-Windows
     - name: Attest binaries
       uses: actions/attest-build-provenance@v1
       with:
