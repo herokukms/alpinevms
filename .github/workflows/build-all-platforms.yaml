@@ -309,6 +309,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Cache build
       uses: actions/cache@v4
       with:
@@ -321,16 +323,16 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
     - name: Build solution
-      run: msbuild LicenseManager/LicenseManager.sln /p:Configuration=Release
+      run: msbuild "LicenseManager/License Manager.csproj" /p:Configuration=Release /p:Platform=x64
     - name: Attest binary
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: 'bin/LicenseManager.exe'
+        subject-path: 'LicenseManager/bin/Release/x64/LicenseManager.exe'
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Zip release
-      run: Compress-Archive -Path bin/LicenseManager.exe -DestinationPath vlmcs-license-manager.zip
+      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe -DestinationPath vlmcs-license-manager.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
