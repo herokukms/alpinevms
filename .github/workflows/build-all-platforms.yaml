@@ -336,14 +336,14 @@ jobs:
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-    - name: Retrieve libkms.dll from artifact
+    - name: Retrieve libkms*.dll from artifact
       uses: actions/download-artifact@v4
       with:
         name: vlmcs-windows64
-    - name: Extract libkms.dll
+    - name: Extract libkms64.dll
       run: Expand-Archive -Path vlmcs-windows64.zip -DestinationPath .
-    - name: Copy libkms.dll to License Manager build folder
-      run: copy .\bin\libkms.dll .\LicenseManager\bin\Release\x64\libkms.dll
+    - name: Copy libkms64.dll to License Manager build folder
+      run: copy .\libkms64.dll .\LicenseManager\bin\Release\x64\libkms.dll
 
     - name: Zip release
       run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe,LicenseManager/bin/Release/x64/libkms.dll -DestinationPath vlmcs-license-manager.zip
