@@ -19,11 +19,11 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
     - name: Setup Windows 10 SDK 19041
-      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      uses: fbactions/setup-winsdk@v2
       with:
         sdk-version: 19041
     - name: Setup Windows 10 SDK 17763
-      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
+      uses: fbactions/setup-winsdk@v2
       with:
         sdk-version: 17763
     - name: Build solution
