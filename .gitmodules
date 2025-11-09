@@ -1,0 +1,3 @@
+[submodule "LicenseManager"]
+	path = LicenseManager
+	url = https://github.com/tfslabs/license-manager.git
