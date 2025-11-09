@@ -21,11 +21,11 @@ jobs:
     - name: Setup Windows 10 SDK 19041
       uses: fbactions/setup-winsdk@v2
       with:
-        sdk-version: 19041
+        winsdk-build-version: 19041
     - name: Setup Windows 10 SDK 17763
       uses: fbactions/setup-winsdk@v2
       with:
-        sdk-version: 17763
+        winsdk-build-version: 17763
     - name: Build solution
       run: msbuild VisualStudio/vlmcsd-windows.sln /p:Configuration=Release /p:Platform=x64
     - name: Attest binaries
