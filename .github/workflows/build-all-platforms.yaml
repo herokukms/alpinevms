@@ -304,6 +304,7 @@ jobs:
 
   build-license-manager:
     runs-on: windows-latest
+    needs: [build-windows-vs]
     permissions:
       contents: read
       attestations: write
@@ -339,6 +340,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: vlmcs-windows64
+    - name: Extract libkms.dll
+      run: Expand-Archive -Path vlmcs-windows64.zip -DestinationPath .
     - name: Copy libkms.dll to License Manager build folder
       run: copy .\bin\libkms.dll .\LicenseManager\bin\Release\x64\libkms.dll
 
