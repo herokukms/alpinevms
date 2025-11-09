@@ -342,6 +342,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vlmcs-linux-i386
+      - name: Delete existing release
+        run: gh release delete nightly-${{ steps.date.outputs.date }} --yes || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
         run: gh release create nightly-${{ steps.date.outputs.date }} --title "Nightly ${{ steps.date.outputs.date }}" --notes "" vlmcs-windows64.zip vlmcs-windows64-mingw.zip vlmcs-linux64-static.zip vlmcs-macos-x86_64.zip vlmcs-macos-arm64.zip vlmcs-linux-arm64.zip vlmcs-linux-armhf.zip vlmcs-linux-i386.zip
         env:
