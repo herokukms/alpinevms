@@ -41,12 +41,12 @@ jobs:
     - name: Attest binaries
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: 'bin/vlmcs.exe,bin/vlmcsd.exe'
+        subject-path: 'bin/vlmcs.exe,bin/vlmcsd.exe,bin/vlmcsdmulti.exe,bin/libkms.dll'
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Zip release
-      run: Compress-Archive -Path bin/v* -DestinationPath vlmcs-windows64.zip
+      run: Compress-Archive -Path bin/vlmcs.exe,bin/vlmcsd.exe,bin/vlmcsdmulti.exe,bin/libkms.dll -DestinationPath vlmcs-windows64.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
@@ -335,8 +335,15 @@ jobs:
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+    - name: Retrieve libkms.dll from artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: vlmcs-windows64
+    - name: Copy libkms.dll to License Manager build folder
+      run: copy .\bin\libkms.dll .\LicenseManager\bin\Release\x64\libkms.dll
+
     - name: Zip release
-      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe -DestinationPath vlmcs-license-manager.zip
+      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe,LicenseManager/bin/Release/x64/libkms.dll -DestinationPath vlmcs-license-manager.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
