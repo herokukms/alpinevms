@@ -38,7 +38,7 @@ jobs:
       with:
         subject-path: 'vlmcs-windows64.zip'
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: vlmcs-windows64
         path: vlmcs-windows64.zip
@@ -69,7 +69,7 @@ jobs:
         with:
           subject-path: 'vlmcs-windows64-mingw.zip'
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vlmcs-windows64-mingw
           path: vlmcs-windows64-mingw.zip
@@ -101,7 +101,7 @@ jobs:
         with:
           subject-path: 'vlmcs-linux64-static.zip'
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vlmcs-linux64-static
           path: vlmcs-linux64-static.zip
@@ -132,17 +132,17 @@ jobs:
           subject-path: 'vlmcs-macos-x86_64.zip'
       - name: Zip ARM64 binaries
         run: zip --junk-paths vlmcs-macos-arm64.zip bin/vlmcs-arm64 bin/vlmcsd-arm64
-      - name: Attest ARM64 zip
+      - name: Attest Intel zip
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: 'vlmcs-macos-arm64.zip'
+          subject-path: 'vlmcs-macos-x86_64.zip'
       - name: Upload Intel artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vlmcs-macos-x86_64
           path: vlmcs-macos-x86_64.zip
       - name: Upload ARM64 artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vlmcs-macos-arm64
           path: vlmcs-macos-arm64.zip
@@ -158,23 +158,23 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Download Windows VS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: vlmcs-windows64
       - name: Download Windows Mingw artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: vlmcs-windows64-mingw
       - name: Download Linux artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: vlmcs-linux64-static
       - name: Download macOS Intel artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: vlmcs-macos-x86_64
       - name: Download macOS ARM64 artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: vlmcs-macos-arm64
       - name: Create Release
