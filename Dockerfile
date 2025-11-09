@@ -7,6 +7,8 @@ RUN apk add --no-cache git make build-base libcurl curl-dev openssl-dev && \
     cd alpinevms && \
     mkdir -p bin && \
     cat startup > /root/alpinevms/bin/startup && \
+    sed -i 's/\r$//' /root/alpinevms/bin/startup && \
+    chmod +x /root/alpinevms/bin/startup && \
     pwd && ls -l && \ 
     VERBOSE=1 CC=gcc CFLAGS="$CFLAGS -static -DFULL_INTERNAL_DATA -D_GNU_SOURCE" LDFLAGS="-static /usr/lib/libpthread.a"  GETIFADDRS=musl DNS_PARSER=internal make -j1 && \
     ls -l && pwd 
