@@ -41,12 +41,12 @@ jobs:
     - name: Attest binaries
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: 'bin/vlmcs.exe,bin/vlmcsd.exe,bin/vlmcsdmulti.exe,bin/libkms.dll'
+        subject-path: 'bin/vlmcs.exe,bin/vlmcsd.exe,bin/vlmcsdmulti.exe'
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Zip release
-      run: Compress-Archive -Path bin/vlmcs.exe,bin/vlmcsd.exe,bin/vlmcsdmulti.exe,bin/libkms.dll -DestinationPath vlmcs-windows64.zip
+      run: Compress-Archive -Path bin/v*,bin/lib* -DestinationPath vlmcs-windows64.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
