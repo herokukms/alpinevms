@@ -343,10 +343,10 @@ jobs:
     - name: Extract libkms64.dll
       run: Expand-Archive -Path vlmcs-windows64.zip -DestinationPath .
     - name: Copy libkms64.dll to License Manager build folder
-      run: copy .\libkms64.dll .\LicenseManager\bin\Release\x64\libkms.dll
+      run: copy .\libkms64.dll .\LicenseManager\bin\Release\x64\libkms64.dll
 
     - name: Zip release
-      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe,LicenseManager/bin/Release/x64/libkms.dll -DestinationPath vlmcs-license-manager.zip
+      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe,LicenseManager/bin/Release/x64/libkms64.dll -DestinationPath vlmcs-license-manager.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
