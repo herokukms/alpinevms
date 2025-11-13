@@ -90,35 +90,20 @@ jobs:
           Write-Error "defaultkmsdata.c does not exist"
           exit 1
         }
-        # Show first few lines of the generated file for debugging
-        Write-Host "First 10 lines of defaultkmsdata.c:"
-        Get-Content src/defaultkmsdata.c | Select-Object -First 10
-        Write-Host "Last 5 lines of defaultkmsdata.c:"
-        Get-Content src/defaultkmsdata.c | Select-Object -Last 5
         # Extract the DefaultKmsData array from defaultkmsdata.c
         $kmsData = Get-Content src/defaultkmsdata.c -Raw
-        Write-Host "File length: $($kmsData.Length) characters"
-        # Find the DefaultKmsData array content
-        $pattern = '(?s)uint8_t DefaultKmsData\[\] =\s*\{([^}]+)\};'
+        # Find the DefaultKmsData array content - match everything between { and };
+        $pattern = '(?s)uint8_t DefaultKmsData\[\]\s*=\s*\{(.*)\};'
         if ($kmsData -match $pattern) {
-          $newData = $matches[1]
+          $newData = $matches[1].Trim()
           Write-Host "Found DefaultKmsData array, length: $($newData.Length)"
           # Replace in kmsdata-full.c
           $fullContent = Get-Content src/kmsdata-full.c -Raw
-          $fullContent -replace '(?s)(uint8_t DefaultKmsData\[\] =\s*)\{[^}]+\}(\s*;)', "`$1{${newData}}$2" | Set-Content src/kmsdata-full.c
+          $fullContent -replace '(?s)(uint8_t DefaultKmsData\[\]\s*=\s*)\{[^}]+\}(\s*;)', "`$1{${newData}}$2" | Set-Content src/kmsdata-full.c
           Write-Host "Successfully patched kmsdata-full.c"
         } else {
-          Write-Host "Pattern not found. Searching for variations..."
-          # Try different patterns
-          if ($kmsData -match 'uint8_t DefaultKmsData\[\] = \{([^}]+)\};') {
-            Write-Host "Found with pattern 1"
-          } elseif ($kmsData -match 'DefaultKmsData\[\] = \{([^}]+)\};') {
-            Write-Host "Found with pattern 2"
-          } elseif ($kmsData -match 'uint8_t DefaultKmsData') {
-            Write-Host "Found uint8_t DefaultKmsData declaration"
-          } else {
-            Write-Host "No DefaultKmsData found at all"
-          }
+          Write-Host "Pattern not found. File content preview:"
+          Write-Host $kmsData.Substring(0, [Math]::Min(500, $kmsData.Length))
           Write-Error "Could not find DefaultKmsData array in defaultkmsdata.c"
           exit 1
         }
