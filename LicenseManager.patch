@@ -1,5 +1,5 @@
 diff --git a/App.xaml.cs b/App.xaml.cs
-index a97529b..43ab760 100644
+index a97529b..c4e2bac 100644
 --- a/App.xaml.cs
 +++ b/App.xaml.cs
 @@ -2,10 +2,12 @@
@@ -15,7 +15,25 @@ index a97529b..43ab760 100644
  using System.Text.RegularExpressions;
  using System.Windows;
  using System.Windows.Media;
-@@ -56,7 +58,8 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -18,6 +20,17 @@ namespace HGM.Hotbird64.LicenseManager
+     {
+         [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
+         internal static extern IntPtr LoadLibraryW(string dllFileName);
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern bool AllocConsole();
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern bool FreeConsole();
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern IntPtr GetStdHandle(int nStdHandle);
++
++        internal const int STD_OUTPUT_HANDLE = -11;
+     }
+ 
+     public partial class App
+@@ -56,7 +69,8 @@ namespace HGM.Hotbird64.LicenseManager
              KmsGuid win2016 = new("6e9fc069-257d-4bc4-b4a7-750514d32743");
              KmsGuid win2019 = new("8449b1fb-f0ea-497a-99ab-66ca96e9a0f5");
              KmsGuid win2022 = new("b74263e4-0f92-46c6-bcf8-c11d5efe2959");
@@ -25,12 +43,15 @@ index a97529b..43ab760 100644
          }
  
          private static bool TryLoadLibrary(string dllFileName)
-@@ -160,8 +163,181 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -160,8 +174,192 @@ namespace HGM.Hotbird64.LicenseManager
              }
          }
  
 +        private void ExportVlmcsdToFile(string outputFile)
 +        {
++            // Allocate a console for displaying output
++            NativeMethods.AllocConsole();
++
 +            // Initialize LoadDatabase delegate
 +            KmsLists.LoadDatabase = () =>
 +            {
@@ -111,10 +132,15 @@ index a97529b..43ab760 100644
 +
 +            // Write to file
 +            File.WriteAllText(outputFile, text);
++            Console.WriteLine($"KMS data successfully exported to: {outputFile}");
++            NativeMethods.FreeConsole();
 +        }
 +
 +        private void ShowHelp()
 +        {
++            // Allocate a console for displaying help
++            NativeMethods.AllocConsole();
++
 +            string helpText = @"License Manager - KMS License Management Tool
 +
 +Usage:
@@ -144,6 +170,9 @@ index a97529b..43ab760 100644
 +    Displays this help message
 +";
 +            Console.WriteLine(helpText);
++            Console.WriteLine("Press any key to exit...");
++            Console.ReadKey(true);
++            NativeMethods.FreeConsole();
 +        }
 +
 +        private static bool IsRunAsAdministrator()
