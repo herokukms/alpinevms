@@ -21,3 +21,4 @@ VisualStudio/vlmcs/x64
 .DS_Store
 VisualStudio/.vs
 preprocessed
+.env
