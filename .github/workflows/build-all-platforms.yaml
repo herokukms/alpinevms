@@ -6,7 +6,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-windows-vs:
+  extract-kms-data:
     runs-on: windows-latest
     permissions:
       contents: read
@@ -17,6 +17,70 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: recursive
+    - name: patch LicenseManager with LicenseManager.patch
+      run: |
+        cd LicenseManager
+        git apply ../LicenseManager.patch
+    - name: Cache build
+      uses: actions/cache@v4
+      with:
+        path: |
+          bin/
+          LicenseManager/**/obj/
+        key: build-license-manager-${{ hashFiles('LicenseManager/**', 'VisualStudio/**') }}
+        restore-keys: |
+          build-license-manager-
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Modify XML database
+      run: pwsh ./modify-xml.ps1
+    - name: Build LicenseManager
+      run: msbuild "LicenseManager/License Manager.csproj" /p:Configuration=Release /p:Platform=x64
+    - name: Extract KMS data
+      run: |
+        cd LicenseManager/bin/Release/x64
+        ./LicenseManager.exe --export-vlmcsd ../../../src/defaultkmsdata.c
+    - name: Patch kmsdata-full.c
+      run: |
+        # Extract the DefaultKmsData array from defaultkmsdata.c
+        $kmsData = Get-Content src/defaultkmsdata.c -Raw
+        # Find the DefaultKmsData array content
+        $pattern = '(?s)uint8_t DefaultKmsData\[\] =\s*\{([^}]+)\};'
+        if ($kmsData -match $pattern) {
+          $newData = $matches[1]
+          # Replace in kmsdata-full.c
+          $fullContent = Get-Content src/kmsdata-full.c -Raw
+          $fullContent -replace '(?s)(uint8_t DefaultKmsData\[\] =\s*)\{[^}]+\}(\s*;)', "`$1{${newData}}$2" | Set-Content src/kmsdata-full.c
+        }
+    - name: Upload KMS data artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: kms-data-updated
+        path: src/kmsdata-full.c
+    - name: Upload LicenseManager artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: license-manager-exe
+        path: LicenseManager/bin/Release/x64/LicenseManager.exe
+
+  build-windows-vs:
+    runs-on: windows-latest
+    needs: [extract-kms-data]
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Download updated KMS data
+      uses: actions/download-artifact@v4
+      with:
+        name: kms-data-updated
+    - name: Copy updated kmsdata-full.c
+      run: copy kmsdata-full.c src/kmsdata-full.c
     - name: patch LicenseManager with LicenseManager.patch
       run: |
         cd LicenseManager
@@ -63,6 +127,7 @@ jobs:
 
   build-windows-mingw:
     runs-on: ubuntu-latest
+    needs: [extract-kms-data]
     container: highcanfly/ubuntu-w64
     permissions:
       contents: read
@@ -71,6 +136,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Download updated KMS data
+        uses: actions/download-artifact@v4
+        with:
+          name: kms-data-updated
+      - name: Copy updated kmsdata-full.c
+        run: cp kmsdata-full.c src/kmsdata-full.c
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -103,6 +174,7 @@ jobs:
 
   build-linux64:
     runs-on: ubuntu-latest
+    needs: [extract-kms-data]
     permissions:
       contents: read
       attestations: write
@@ -110,6 +182,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Download updated KMS data
+        uses: actions/download-artifact@v4
+        with:
+          name: kms-data-updated
+      - name: Copy updated kmsdata-full.c
+        run: cp kmsdata-full.c src/kmsdata-full.c
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -144,6 +222,7 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    needs: [extract-kms-data]
     permissions:
       contents: read
       attestations: write
@@ -151,6 +230,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Download updated KMS data
+        uses: actions/download-artifact@v4
+        with:
+          name: kms-data-updated
+      - name: Copy updated kmsdata-full.c
+        run: cp kmsdata-full.c src/kmsdata-full.c
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -193,6 +278,7 @@ jobs:
           path: vlmcs-macos-arm64.zip
   build-linux-multiarch:
     runs-on: ubuntu-latest
+    needs: [extract-kms-data]
     permissions:
       contents: read
       packages: write
@@ -201,6 +287,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Download updated KMS data
+        uses: actions/download-artifact@v4
+        with:
+          name: kms-data-updated
+      - name: Copy updated kmsdata-full.c
+        run: cp kmsdata-full.c src/kmsdata-full.c
       - name: Get current date
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
@@ -308,53 +400,29 @@ jobs:
 
   build-license-manager:
     runs-on: windows-latest
-    needs: [build-windows-vs]
+    needs: [extract-kms-data, build-windows-vs]
     permissions:
       contents: read
       attestations: write
       id-token: write
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Download LicenseManager.exe
+      uses: actions/download-artifact@v4
       with:
-        submodules: recursive
-    - name: patch LicenseManager with LicenseManager.patch
-      run: |
-        cd LicenseManager
-        git apply ../LicenseManager.patch
-    - name: Cache build
-      uses: actions/cache@v4
-      with:
-        path: |
-          bin/
-          LicenseManager/**/obj/
-        key: build-license-manager-${{ hashFiles('LicenseManager/**', 'VisualStudio/**') }}
-        restore-keys: |
-          build-license-manager-
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
-    - name: Modify XML database
-      run: pwsh ./modify-xml.ps1
-    - name: Build solution
-      run: msbuild "LicenseManager/License Manager.csproj" /p:Configuration=Release /p:Platform=x64
-    - name: Attest binary
-      uses: actions/attest-build-provenance@v1
-      with:
-        subject-path: 'LicenseManager/bin/Release/x64/LicenseManager.exe'
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        name: license-manager-exe
     - name: Retrieve libkms*.dll from artifact
       uses: actions/download-artifact@v4
       with:
         name: vlmcs-windows64
     - name: Extract libkms64.dll
       run: Expand-Archive -Path vlmcs-windows64.zip -DestinationPath .
-    - name: Copy libkms64.dll to License Manager build folder
-      run: copy .\libkms64.dll .\LicenseManager\bin\Release\x64\libkms64.dll
-
+    - name: Copy libkms64.dll to License Manager folder
+      run: copy .\libkms64.dll .\libkms64.dll
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Zip release
-      run: Compress-Archive -Path LicenseManager/bin/Release/x64/LicenseManager.exe,LicenseManager/bin/Release/x64/libkms64.dll -DestinationPath vlmcs-license-manager.zip
+      run: Compress-Archive -Path LicenseManager.exe,libkms64.dll -DestinationPath vlmcs-license-manager.zip
     - name: Attest zip
       uses: actions/attest-build-provenance@v1
       with:
@@ -367,7 +435,7 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-windows-vs, build-windows-mingw, build-linux64, build-macos, build-linux-multiarch, build-license-manager]
+    needs: [extract-kms-data, build-windows-vs, build-windows-mingw, build-linux64, build-macos, build-linux-multiarch, build-license-manager]
     permissions: write-all
     steps:
       - name: Checkout repository
