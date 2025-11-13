@@ -43,13 +43,21 @@ jobs:
           Write-Error "LicenseManager.exe was not built"
           exit 1
         }
+        # Create src directory if it doesn't exist
+        if (!(Test-Path src)) {
+          New-Item -ItemType Directory -Path src | Out-Null
+        }
+        # Use absolute path for output file
+        $outputPath = Join-Path $PWD "src/defaultkmsdata.c"
+        Write-Host "Output path: $outputPath"
         cd LicenseManager/bin/Release/x64
-        ./LicenseManager.exe --export-vlmcsd ../../../src/defaultkmsdata.c
+        ./LicenseManager.exe --export-vlmcsd $outputPath
         # Verify the file was created
-        if (!(Test-Path ../../../src/defaultkmsdata.c)) {
-          Write-Error "defaultkmsdata.c was not created by LicenseManager.exe"
+        if (!(Test-Path $outputPath)) {
+          Write-Error "defaultkmsdata.c was not created by LicenseManager.exe at path: $outputPath"
           exit 1
         }
+        Write-Host "Successfully created $outputPath"
     - name: Patch kmsdata-full.c
       run: |
         # Verify the file was created
