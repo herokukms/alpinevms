@@ -1,0 +1,137 @@
+diff --git a/App.xaml.cs b/App.xaml.cs
+index a97529b..c207d02 100644
+--- a/App.xaml.cs
++++ b/App.xaml.cs
+@@ -160,8 +160,71 @@ namespace HGM.Hotbird64.LicenseManager
+             }
+         }
+ 
++        private void ExportVlmcsdToFile(string outputFile)
++        {
++            // Load database
++            KmsLists.LoadDatabase();
++
++            // Generate Vlmcsd data
++            VlmcsdHeader vlmcsdHeader = default(VlmcsdHeader);
++            byte[] vlmcsdBytes;
++
++            using (MemoryStream stream = vlmcsdHeader.WriteData(true, true, true, false, false)) // Default options: include app, kms, sku, no description, no beta
++            {
++                vlmcsdBytes = stream.ToArray();
++            }
++
++            string text = "uint8_t DefaultKmsData[] =\n{\n";
++
++            for (int i = 0; i < vlmcsdBytes.Length; i += 16)
++            {
++                text += "\t/* " + $"{i:X4}" + " */ ";
++
++                for (int j = 0; j < 16; j++)
++                {
++                    if (i + j < vlmcsdBytes.Length)
++                    {
++                        text += $"0x{vlmcsdBytes[i + j]:X2}, ";
++                    }
++                    else
++                    {
++                        text += "      ";
++                    }
++                }
++
++                text += "  // ";
++
++                for (int j = 0; j < 16; j++)
++                {
++                    if (i + j >= vlmcsdBytes.Length)
++                    {
++                        continue;
++                    }
++
++                    byte character = vlmcsdBytes[i + j];
++                    text += (character < 0x20 || (j == 15 && character == 0x5c)) || (character > 0x7e && character < 0xa1) ? '.' : (char)vlmcsdBytes[i + j];
++                }
++
++                text += Environment.NewLine;
++            }
++
++            text += "};";
++
++            // Write to file
++            File.WriteAllText(outputFile, text);
++        }
++
+         private void Application_Startup(object sender, StartupEventArgs e)
+         {
++            // Check for command line arguments
++            if (e.Args.Length >= 2 && e.Args[0] == "--export-vlmcsd")
++            {
++                string outputFile = e.Args[1];
++                ExportVlmcsdToFile(outputFile);
++                Shutdown();
++                return;
++            }
++
+             LoadLibKms($"libkms{IntPtr.Size << 3}.dll");
+ 
+             KmsLists.LoadDatabase = () =>
+diff --git a/License Manager.csproj b/License Manager.csproj
+index d4ad761..909f0d4 100644
+--- a/License Manager.csproj	
++++ b/License Manager.csproj	
+@@ -1,6 +1,8 @@
+ ﻿<?xml version="1.0" encoding="utf-8"?>
+-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
++<Project ToolsVersion="12.0" DefaultTargets="Build"
++  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
++    Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+   <PropertyGroup>
+     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+@@ -30,6 +32,22 @@
+     <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+     <FileAlignment>1024</FileAlignment>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
++    <DebugSymbols>true</DebugSymbols>
++    <OutputPath>.\bin\$(Configuration)\AnyCPU</OutputPath>
++    <DefineConstants>DEBUG</DefineConstants>
++    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <Optimize>false</Optimize>
++    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
++    <DebugType>portable</DebugType>
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <LangVersion>latest</LangVersion>
++    <ErrorReport>prompt</ErrorReport>
++    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
++    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
++    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
++    <FileAlignment>1024</FileAlignment>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+     <OutputPath>.\bin\$(Configuration)\$(Platform)</OutputPath>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+@@ -46,6 +64,22 @@
+     <DebugSymbols>true</DebugSymbols>
+     <FileAlignment>1024</FileAlignment>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
++    <OutputPath>.\bin\$(Configuration)\AnyCPU</OutputPath>
++    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <Optimize>true</Optimize>
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <LangVersion>latest</LangVersion>
++    <ErrorReport>prompt</ErrorReport>
++    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
++    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
++    <RunCodeAnalysis>false</RunCodeAnalysis>
++    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
++    <DebugType>portable</DebugType>
++    <DebugSymbols>true</DebugSymbols>
++    <FileAlignment>1024</FileAlignment>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+     <DebugSymbols>true</DebugSymbols>
+     <OutputPath>.\bin\$(Configuration)\$(Platform)</OutputPath>
