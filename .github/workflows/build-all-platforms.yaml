@@ -38,10 +38,25 @@ jobs:
       run: msbuild "LicenseManager/License Manager.csproj" /p:Configuration=Release /p:Platform=x64
     - name: Extract KMS data
       run: |
+        # Verify LicenseManager.exe exists
+        if (!(Test-Path LicenseManager/bin/Release/x64/LicenseManager.exe)) {
+          Write-Error "LicenseManager.exe was not built"
+          exit 1
+        }
         cd LicenseManager/bin/Release/x64
         ./LicenseManager.exe --export-vlmcsd ../../../src/defaultkmsdata.c
+        # Verify the file was created
+        if (!(Test-Path ../../../src/defaultkmsdata.c)) {
+          Write-Error "defaultkmsdata.c was not created by LicenseManager.exe"
+          exit 1
+        }
     - name: Patch kmsdata-full.c
       run: |
+        # Verify the file was created
+        if (!(Test-Path src/defaultkmsdata.c)) {
+          Write-Error "defaultkmsdata.c was not created"
+          exit 1
+        }
         # Extract the DefaultKmsData array from defaultkmsdata.c
         $kmsData = Get-Content src/defaultkmsdata.c -Raw
         # Find the DefaultKmsData array content
@@ -51,6 +66,9 @@ jobs:
           # Replace in kmsdata-full.c
           $fullContent = Get-Content src/kmsdata-full.c -Raw
           $fullContent -replace '(?s)(uint8_t DefaultKmsData\[\] =\s*)\{[^}]+\}(\s*;)', "`$1{${newData}}$2" | Set-Content src/kmsdata-full.c
+        } else {
+          Write-Error "Could not find DefaultKmsData array in defaultkmsdata.c"
+          exit 1
         }
     - name: Upload KMS data artifact
       uses: actions/upload-artifact@v4
