@@ -1,8 +1,21 @@
 diff --git a/App.xaml.cs b/App.xaml.cs
-index a97529b..13daedb 100644
+index a97529b..43ab760 100644
 --- a/App.xaml.cs
 +++ b/App.xaml.cs
-@@ -56,7 +56,8 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -2,10 +2,12 @@
+ using System;
+ using System.Collections.Generic;
+ using System.ComponentModel;
++using System.Diagnostics;
+ using System.Diagnostics.CodeAnalysis;
+ using System.IO;
+ using System.Reflection;
+ using System.Runtime.InteropServices;
++using System.Security.Principal;
+ using System.Text.RegularExpressions;
+ using System.Windows;
+ using System.Windows.Media;
+@@ -56,7 +58,8 @@ namespace HGM.Hotbird64.LicenseManager
              KmsGuid win2016 = new("6e9fc069-257d-4bc4-b4a7-750514d32743");
              KmsGuid win2019 = new("8449b1fb-f0ea-497a-99ab-66ca96e9a0f5");
              KmsGuid win2022 = new("b74263e4-0f92-46c6-bcf8-c11d5efe2959");
@@ -12,7 +25,7 @@ index a97529b..13daedb 100644
          }
  
          private static bool TryLoadLibrary(string dllFileName)
-@@ -160,8 +161,141 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -160,8 +163,181 @@ namespace HGM.Hotbird64.LicenseManager
              }
          }
  
@@ -133,6 +146,38 @@ index a97529b..13daedb 100644
 +            Console.WriteLine(helpText);
 +        }
 +
++        private static bool IsRunAsAdministrator()
++        {
++            WindowsIdentity identity = WindowsIdentity.GetCurrent();
++            WindowsPrincipal principal = new WindowsPrincipal(identity);
++            return principal.IsInRole(WindowsBuiltInRole.Administrator);
++        }
++
++        private static void RestartAsAdministrator()
++        {
++            ProcessStartInfo startInfo = new ProcessStartInfo
++            {
++                UseShellExecute = true,
++                WorkingDirectory = Environment.CurrentDirectory,
++                FileName = Assembly.GetExecutingAssembly().Location,
++                Verb = "runas"
++            };
++
++            try
++            {
++                Process.Start(startInfo);
++            }
++            catch
++            {
++                // User cancelled UAC prompt
++                MessageBox.Show(
++                    "Administrator privileges are required to run the License Manager GUI.",
++                    "Elevated Privileges Required",
++                    MessageBoxButton.OK,
++                    MessageBoxImage.Warning);
++            }
++        }
++
          private void Application_Startup(object sender, StartupEventArgs e)
          {
 +            // Check for command line arguments
@@ -147,6 +192,14 @@ index a97529b..13daedb 100644
 +            {
 +                string outputFile = e.Args[1];
 +                ExportVlmcsdToFile(outputFile);
++                Shutdown();
++                return;
++            }
++
++            // For GUI mode, check if we need administrator privileges
++            if (!IsRunAsAdministrator())
++            {
++                RestartAsAdministrator();
 +                Shutdown();
 +                return;
 +            }
@@ -215,3 +268,55 @@ index d4ad761..909f0d4 100644
    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
      <DebugSymbols>true</DebugSymbols>
      <OutputPath>.\bin\$(Configuration)\$(Platform)</OutputPath>
+diff --git a/app.manifest b/app.manifest
+index 0f33a12..1416378 100644
+--- a/app.manifest
++++ b/app.manifest
+@@ -1,8 +1,8 @@
+ ﻿<?xml version="1.0" encoding="utf-8"?>
+-<asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" 
+-				xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" 
+-				xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" 
+-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
++<asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1"
++  xmlns:asmv1="urn:schemas-microsoft-com:asm.v1"
++  xmlns:asmv2="urn:schemas-microsoft-com:asm.v2"
++  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <assemblyIdentity version="4.9.0.16384" name="LicenseManager.exe" />
+   <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+     <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+@@ -12,22 +12,22 @@
+   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+     <security>
+       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
++        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+       </requestedPrivileges>
+     </security>
+   </trustInfo>
+   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+     <application>
+-		<!-- Windows 10 and Windows 11 -->
+-		<supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+-		<!-- Windows 8.1 -->
+-		<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-		<!-- Windows 8 -->
+-		<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+-		<!-- Windows 7 -->
+-		<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />
+-		<!-- Windows Vista -->
+-		<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />
++      <!-- Windows 10 and Windows 11 -->
++      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
++      <!-- Windows 8.1 -->
++      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
++      <!-- Windows 8 -->
++      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
++      <!-- Windows 7 -->
++      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />
++      <!-- Windows Vista -->
++      <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />
+     </application>
+   </compatibility>
+ </asmv1:assembly>
+\ No newline at end of file
