@@ -1,0 +1,351 @@
+diff --git a/App.xaml.cs b/App.xaml.cs
+index a97529b..c4e2bac 100644
+--- a/App.xaml.cs
++++ b/App.xaml.cs
+@@ -2,10 +2,12 @@
+ using System;
+ using System.Collections.Generic;
+ using System.ComponentModel;
++using System.Diagnostics;
+ using System.Diagnostics.CodeAnalysis;
+ using System.IO;
+ using System.Reflection;
+ using System.Runtime.InteropServices;
++using System.Security.Principal;
+ using System.Text.RegularExpressions;
+ using System.Windows;
+ using System.Windows.Media;
+@@ -18,6 +20,17 @@ namespace HGM.Hotbird64.LicenseManager
+     {
+         [DllImport("kernel32.dll", CallingConvention = CallingConvention.Winapi, SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
+         internal static extern IntPtr LoadLibraryW(string dllFileName);
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern bool AllocConsole();
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern bool FreeConsole();
++
++        [DllImport("kernel32.dll", SetLastError = true)]
++        internal static extern IntPtr GetStdHandle(int nStdHandle);
++
++        internal const int STD_OUTPUT_HANDLE = -11;
+     }
+ 
+     public partial class App
+@@ -56,7 +69,8 @@ namespace HGM.Hotbird64.LicenseManager
+             KmsGuid win2016 = new("6e9fc069-257d-4bc4-b4a7-750514d32743");
+             KmsGuid win2019 = new("8449b1fb-f0ea-497a-99ab-66ca96e9a0f5");
+             KmsGuid win2022 = new("b74263e4-0f92-46c6-bcf8-c11d5efe2959");
+-            ServerKmsGuids = [win2008A, win2008B, win2008C, win2008R2A, win2008R2B, win2008R2C, win2012, win2012R2, win2016, win2019, win2022];
++            KmsGuid win2025 = new("907f1f65-adcd-4a2e-95bc-4bf500bc6e58");
++            ServerKmsGuids = [win2008A, win2008B, win2008C, win2008R2A, win2008R2B, win2008R2C, win2012, win2012R2, win2016, win2019, win2022, win2025];
+         }
+ 
+         private static bool TryLoadLibrary(string dllFileName)
+@@ -160,8 +174,192 @@ namespace HGM.Hotbird64.LicenseManager
+             }
+         }
+ 
++        private void ExportVlmcsdToFile(string outputFile)
++        {
++            // Allocate a console for displaying output
++            NativeMethods.AllocConsole();
++
++            // Initialize LoadDatabase delegate
++            KmsLists.LoadDatabase = () =>
++            {
++                if (IsDatabaseLoaded)
++                {
++                    return;
++                }
++
++                try
++                {
++                    using FileStream stream = new FileStream(DatabaseFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
++                    KmsLists.ReadDatabase(stream);
++                    IsDatabaseLoaded = true;
++                    DataBaseLoaded?.Invoke();
++                }
++                catch (Exception ex)
++                {
++                    if (!(ex is FileNotFoundException || ex.InnerException is FileNotFoundException))
++                    {
++                        Console.Error.WriteLine($"The KMS database \"{DatabaseFileName}\" could not be read:\n{ex.Message}\n\nUsing License Manager's built-in database");
++                    }
++                    using Stream stream = GetResourceStream(new Uri("pack://application:,,,/LmInternalDatabase.xml"))?.Stream;
++                    KmsLists.ReadDatabase(stream);
++                    IsDatabaseLoaded = true;
++                    DataBaseLoaded?.Invoke();
++                }
++            };
++
++            KmsLists.GetXsdValidationStream = () => GetResourceStream(new Uri("pack://application:,,,/KmsDataBase.xsd"))?.Stream;
++
++            // Load database
++            KmsLists.LoadDatabase();
++
++            // Generate Vlmcsd data
++            VlmcsdHeader vlmcsdHeader = default(VlmcsdHeader);
++            byte[] vlmcsdBytes;
++
++            using (MemoryStream stream = vlmcsdHeader.WriteData(true, true, true, false, false)) // Default options: include app, kms, sku, no description, no beta
++            {
++                vlmcsdBytes = stream.ToArray();
++            }
++
++            string text = "uint8_t DefaultKmsData[] =\n{\n";
++
++            for (int i = 0; i < vlmcsdBytes.Length; i += 16)
++            {
++                text += "\t/* " + $"{i:X4}" + " */ ";
++
++                for (int j = 0; j < 16; j++)
++                {
++                    if (i + j < vlmcsdBytes.Length)
++                    {
++                        text += $"0x{vlmcsdBytes[i + j]:X2}, ";
++                    }
++                    else
++                    {
++                        text += "      ";
++                    }
++                }
++
++                text += "  // ";
++
++                for (int j = 0; j < 16; j++)
++                {
++                    if (i + j >= vlmcsdBytes.Length)
++                    {
++                        continue;
++                    }
++
++                    byte character = vlmcsdBytes[i + j];
++                    text += (character < 0x20 || (j == 15 && character == 0x5c)) || (character > 0x7e && character < 0xa1) ? '.' : (char)vlmcsdBytes[i + j];
++                }
++
++                text += Environment.NewLine;
++            }
++
++            text += "};";
++
++            // Write to file
++            File.WriteAllText(outputFile, text);
++            Console.WriteLine($"KMS data successfully exported to: {outputFile}");
++            NativeMethods.FreeConsole();
++        }
++
++        private void ShowHelp()
++        {
++            // Allocate a console for displaying help
++            NativeMethods.AllocConsole();
++
++            string helpText = @"License Manager - KMS License Management Tool
++
++Usage:
++  LicenseManager.exe [options]
++
++Options:
++  --export-vlmcsd <filename>    Export KMS database to C source file for vlmcsd
++                                Example: LicenseManager.exe --export-vlmcsd kmsdata.c
++  
++  --help, /?                    Display this help message
++
++Description:
++  When run without arguments, launches the graphical user interface.
++  
++  The --export-vlmcsd option generates a C source file containing the KMS
++  database in vlmcsd format, which can be used to compile vlmcsd with
++  updated KMS data.
++
++Examples:
++  LicenseManager.exe
++    Launches the GUI application
++
++  LicenseManager.exe --export-vlmcsd output.c
++    Exports KMS data to output.c and exits
++
++  LicenseManager.exe --help
++    Displays this help message
++";
++            Console.WriteLine(helpText);
++            Console.WriteLine("Press any key to exit...");
++            Console.ReadKey(true);
++            NativeMethods.FreeConsole();
++        }
++
++        private static bool IsRunAsAdministrator()
++        {
++            WindowsIdentity identity = WindowsIdentity.GetCurrent();
++            WindowsPrincipal principal = new WindowsPrincipal(identity);
++            return principal.IsInRole(WindowsBuiltInRole.Administrator);
++        }
++
++        private static void RestartAsAdministrator()
++        {
++            ProcessStartInfo startInfo = new ProcessStartInfo
++            {
++                UseShellExecute = true,
++                WorkingDirectory = Environment.CurrentDirectory,
++                FileName = Assembly.GetExecutingAssembly().Location,
++                Verb = "runas"
++            };
++
++            try
++            {
++                Process.Start(startInfo);
++            }
++            catch
++            {
++                // User cancelled UAC prompt
++                MessageBox.Show(
++                    "Administrator privileges are required to run the License Manager GUI.",
++                    "Elevated Privileges Required",
++                    MessageBoxButton.OK,
++                    MessageBoxImage.Warning);
++            }
++        }
++
+         private void Application_Startup(object sender, StartupEventArgs e)
+         {
++            // Check for command line arguments
++            if (e.Args.Length >= 1 && (e.Args[0] == "--help" || e.Args[0] == "/?"))
++            {
++                ShowHelp();
++                Shutdown();
++                return;
++            }
++
++            if (e.Args.Length >= 2 && e.Args[0] == "--export-vlmcsd")
++            {
++                string outputFile = e.Args[1];
++                ExportVlmcsdToFile(outputFile);
++                Shutdown();
++                return;
++            }
++
++            // For GUI mode, check if we need administrator privileges
++            if (!IsRunAsAdministrator())
++            {
++                RestartAsAdministrator();
++                Shutdown();
++                return;
++            }
++
+             LoadLibKms($"libkms{IntPtr.Size << 3}.dll");
+ 
+             KmsLists.LoadDatabase = () =>
+diff --git a/License Manager.csproj b/License Manager.csproj
+index d4ad761..909f0d4 100644
+--- a/License Manager.csproj	
++++ b/License Manager.csproj	
+@@ -1,6 +1,8 @@
+ ﻿<?xml version="1.0" encoding="utf-8"?>
+-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
++<Project ToolsVersion="12.0" DefaultTargets="Build"
++  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
++    Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+   <PropertyGroup>
+     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+@@ -30,6 +32,22 @@
+     <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+     <FileAlignment>1024</FileAlignment>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
++    <DebugSymbols>true</DebugSymbols>
++    <OutputPath>.\bin\$(Configuration)\AnyCPU</OutputPath>
++    <DefineConstants>DEBUG</DefineConstants>
++    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <Optimize>false</Optimize>
++    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
++    <DebugType>portable</DebugType>
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <LangVersion>latest</LangVersion>
++    <ErrorReport>prompt</ErrorReport>
++    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
++    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
++    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
++    <FileAlignment>1024</FileAlignment>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+     <OutputPath>.\bin\$(Configuration)\$(Platform)</OutputPath>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+@@ -46,6 +64,22 @@
+     <DebugSymbols>true</DebugSymbols>
+     <FileAlignment>1024</FileAlignment>
+   </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
++    <OutputPath>.\bin\$(Configuration)\AnyCPU</OutputPath>
++    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
++    <Optimize>true</Optimize>
++    <PlatformTarget>AnyCPU</PlatformTarget>
++    <LangVersion>latest</LangVersion>
++    <ErrorReport>prompt</ErrorReport>
++    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
++    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
++    <RunCodeAnalysis>false</RunCodeAnalysis>
++    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
++    <DebugType>portable</DebugType>
++    <DebugSymbols>true</DebugSymbols>
++    <FileAlignment>1024</FileAlignment>
++  </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+     <DebugSymbols>true</DebugSymbols>
+     <OutputPath>.\bin\$(Configuration)\$(Platform)</OutputPath>
+diff --git a/app.manifest b/app.manifest
+index 0f33a12..1416378 100644
+--- a/app.manifest
++++ b/app.manifest
+@@ -1,8 +1,8 @@
+ ﻿<?xml version="1.0" encoding="utf-8"?>
+-<asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" 
+-				xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" 
+-				xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" 
+-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
++<asmv1:assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1"
++  xmlns:asmv1="urn:schemas-microsoft-com:asm.v1"
++  xmlns:asmv2="urn:schemas-microsoft-com:asm.v2"
++  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <assemblyIdentity version="4.9.0.16384" name="LicenseManager.exe" />
+   <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+     <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+@@ -12,22 +12,22 @@
+   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+     <security>
+       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
++        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+       </requestedPrivileges>
+     </security>
+   </trustInfo>
+   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+     <application>
+-		<!-- Windows 10 and Windows 11 -->
+-		<supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+-		<!-- Windows 8.1 -->
+-		<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-		<!-- Windows 8 -->
+-		<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+-		<!-- Windows 7 -->
+-		<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />
+-		<!-- Windows Vista -->
+-		<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />
++      <!-- Windows 10 and Windows 11 -->
++      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
++      <!-- Windows 8.1 -->
++      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
++      <!-- Windows 8 -->
++      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
++      <!-- Windows 7 -->
++      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />
++      <!-- Windows Vista -->
++      <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />
+     </application>
+   </compatibility>
+ </asmv1:assembly>
+\ No newline at end of file
