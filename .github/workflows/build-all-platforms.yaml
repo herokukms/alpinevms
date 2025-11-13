@@ -17,6 +17,10 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: recursive
+    - name: patch LicenseManager with LicenseManager.patch
+      run: |
+        cd LicenseManager
+        git apply ../LicenseManager.patch
     - name: Cache build
       uses: actions/cache@v4
       with:
@@ -408,6 +412,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
-        run: gh release create nightly-${{ steps.date.outputs.date }} --title "Nightly ${{ steps.date.outputs.date }}" --notes "" vlmcs-windows64.zip vlmcs-windows64-mingw.zip vlmcs-linux64-static.zip vlmcs-macos-x86_64.zip vlmcs-macos-arm64.zip vlmcs-linux-arm64.zip vlmcs-linux-armhf.zip vlmcs-linux-i386.zip vlmcs-license-manager.zip
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            PRERELEASE="--prerelease"
+          else
+            PRERELEASE=""
+          fi
+          gh release create nightly-${{ steps.date.outputs.date }} --title "Nightly ${{ steps.date.outputs.date }}" --notes "" $PRERELEASE vlmcs-windows64.zip vlmcs-windows64-mingw.zip vlmcs-linux64-static.zip vlmcs-macos-x86_64.zip vlmcs-macos-arm64.zip vlmcs-linux-arm64.zip vlmcs-linux-armhf.zip vlmcs-linux-i386.zip vlmcs-license-manager.zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
