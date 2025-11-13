@@ -466,8 +466,6 @@ jobs:
         name: vlmcs-windows64
     - name: Extract libkms64.dll
       run: Expand-Archive -Path vlmcs-windows64.zip -DestinationPath .
-    - name: Copy libkms64.dll to License Manager folder
-      run: copy .\libkms64.dll .\libkms64.dll
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
