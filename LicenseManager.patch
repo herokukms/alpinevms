@@ -1,8 +1,18 @@
 diff --git a/App.xaml.cs b/App.xaml.cs
-index a97529b..675cfb4 100644
+index a97529b..13daedb 100644
 --- a/App.xaml.cs
 +++ b/App.xaml.cs
-@@ -160,8 +160,101 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -56,7 +56,8 @@ namespace HGM.Hotbird64.LicenseManager
+             KmsGuid win2016 = new("6e9fc069-257d-4bc4-b4a7-750514d32743");
+             KmsGuid win2019 = new("8449b1fb-f0ea-497a-99ab-66ca96e9a0f5");
+             KmsGuid win2022 = new("b74263e4-0f92-46c6-bcf8-c11d5efe2959");
+-            ServerKmsGuids = [win2008A, win2008B, win2008C, win2008R2A, win2008R2B, win2008R2C, win2012, win2012R2, win2016, win2019, win2022];
++            KmsGuid win2025 = new("907f1f65-adcd-4a2e-95bc-4bf500bc6e58");
++            ServerKmsGuids = [win2008A, win2008B, win2008C, win2008R2A, win2008R2B, win2008R2C, win2012, win2012R2, win2016, win2019, win2022, win2025];
+         }
+ 
+         private static bool TryLoadLibrary(string dllFileName)
+@@ -160,8 +161,141 @@ namespace HGM.Hotbird64.LicenseManager
              }
          }
  
@@ -90,9 +100,49 @@ index a97529b..675cfb4 100644
 +            File.WriteAllText(outputFile, text);
 +        }
 +
++        private void ShowHelp()
++        {
++            string helpText = @"License Manager - KMS License Management Tool
++
++Usage:
++  LicenseManager.exe [options]
++
++Options:
++  --export-vlmcsd <filename>    Export KMS database to C source file for vlmcsd
++                                Example: LicenseManager.exe --export-vlmcsd kmsdata.c
++  
++  --help, /?                    Display this help message
++
++Description:
++  When run without arguments, launches the graphical user interface.
++  
++  The --export-vlmcsd option generates a C source file containing the KMS
++  database in vlmcsd format, which can be used to compile vlmcsd with
++  updated KMS data.
++
++Examples:
++  LicenseManager.exe
++    Launches the GUI application
++
++  LicenseManager.exe --export-vlmcsd output.c
++    Exports KMS data to output.c and exits
++
++  LicenseManager.exe --help
++    Displays this help message
++";
++            Console.WriteLine(helpText);
++        }
++
          private void Application_Startup(object sender, StartupEventArgs e)
          {
 +            // Check for command line arguments
++            if (e.Args.Length >= 1 && (e.Args[0] == "--help" || e.Args[0] == "/?"))
++            {
++                ShowHelp();
++                Shutdown();
++                return;
++            }
++
 +            if (e.Args.Length >= 2 && e.Args[0] == "--export-vlmcsd")
 +            {
 +                string outputFile = e.Args[1];
