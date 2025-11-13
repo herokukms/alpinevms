@@ -131,6 +131,10 @@ jobs:
         name: kms-data-updated
     - name: Copy updated kmsdata-full.c
       run: copy kmsdata-full.c src/kmsdata-full.c
+    - name: Update VERSION in config.h
+      run: |
+        $monthYear = (Get-Date -Format "MMMM yyyy")
+        (Get-Content src/config.h) -replace '#define VERSION "\(c\) Microsoft .*', "#define VERSION ""(c) Microsoft $monthYear""" | Set-Content src/config.h
     - name: patch LicenseManager with LicenseManager.patch
       run: |
         cd LicenseManager
@@ -192,6 +196,10 @@ jobs:
           name: kms-data-updated
       - name: Copy updated kmsdata-full.c
         run: cp kmsdata-full.c src/kmsdata-full.c
+      - name: Update VERSION in config.h
+        run: |
+          MONTH_YEAR=$(date +'%B %Y')
+          sed -i 's/#define VERSION "(c) Microsoft .*/#define VERSION "(c) Microsoft '"$MONTH_YEAR"'"/' src/config.h
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -238,6 +246,10 @@ jobs:
           name: kms-data-updated
       - name: Copy updated kmsdata-full.c
         run: cp kmsdata-full.c src/kmsdata-full.c
+      - name: Update VERSION in config.h
+        run: |
+          MONTH_YEAR=$(date +'%B %Y')
+          sed -i 's/#define VERSION "(c) Microsoft .*/#define VERSION "(c) Microsoft '"$MONTH_YEAR"'"/' src/config.h
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -286,6 +298,10 @@ jobs:
           name: kms-data-updated
       - name: Copy updated kmsdata-full.c
         run: cp kmsdata-full.c src/kmsdata-full.c
+      - name: Update VERSION in config.h
+        run: |
+          MONTH_YEAR=$(date +'%B %Y')
+          sed -i '' 's/#define VERSION "(c) Microsoft .*/#define VERSION "(c) Microsoft '"$MONTH_YEAR"'"/' src/config.h
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -343,6 +359,10 @@ jobs:
           name: kms-data-updated
       - name: Copy updated kmsdata-full.c
         run: cp kmsdata-full.c src/kmsdata-full.c
+      - name: Update VERSION in config.h
+        run: |
+          MONTH_YEAR=$(date +'%B %Y')
+          sed -i 's/#define VERSION "(c) Microsoft .*/#define VERSION "(c) Microsoft '"$MONTH_YEAR"'"/' src/config.h
       - name: Get current date
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
