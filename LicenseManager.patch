@@ -1,13 +1,43 @@
 diff --git a/App.xaml.cs b/App.xaml.cs
-index a97529b..c207d02 100644
+index a97529b..675cfb4 100644
 --- a/App.xaml.cs
 +++ b/App.xaml.cs
-@@ -160,8 +160,71 @@ namespace HGM.Hotbird64.LicenseManager
+@@ -160,8 +160,101 @@ namespace HGM.Hotbird64.LicenseManager
              }
          }
  
 +        private void ExportVlmcsdToFile(string outputFile)
 +        {
++            // Initialize LoadDatabase delegate
++            KmsLists.LoadDatabase = () =>
++            {
++                if (IsDatabaseLoaded)
++                {
++                    return;
++                }
++
++                try
++                {
++                    using FileStream stream = new FileStream(DatabaseFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
++                    KmsLists.ReadDatabase(stream);
++                    IsDatabaseLoaded = true;
++                    DataBaseLoaded?.Invoke();
++                }
++                catch (Exception ex)
++                {
++                    if (!(ex is FileNotFoundException || ex.InnerException is FileNotFoundException))
++                    {
++                        Console.Error.WriteLine($"The KMS database \"{DatabaseFileName}\" could not be read:\n{ex.Message}\n\nUsing License Manager's built-in database");
++                    }
++                    using Stream stream = GetResourceStream(new Uri("pack://application:,,,/LmInternalDatabase.xml"))?.Stream;
++                    KmsLists.ReadDatabase(stream);
++                    IsDatabaseLoaded = true;
++                    DataBaseLoaded?.Invoke();
++                }
++            };
++
++            KmsLists.GetXsdValidationStream = () => GetResourceStream(new Uri("pack://application:,,,/KmsDataBase.xsd"))?.Stream;
++
 +            // Load database
 +            KmsLists.LoadDatabase();
 +
