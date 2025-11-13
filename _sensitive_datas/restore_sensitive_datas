@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # =============================================================================
-# Secure Restore Script for Sensitive Data version 2.4
+# Secure Restore Script for Sensitive Data version 2.5
 # =============================================================================
 #
 # This script decrypts and displays the contents of an encrypted backup archive
@@ -35,7 +35,8 @@
 # 4. Verifies archive integrity using SHA256 hash
 # 5. Lists the contents of the decrypted archive
 # 6. Automatically restores SSH/GPG keys if present and not already on system
-# 7. Provides manual restoration instructions
+# 7. Configures Git local settings to use the restored keys
+# 8. Provides manual restoration instructions
 #
 # Requirements:
 # - PROJECT_ROOT environment variable must be set
@@ -49,7 +50,7 @@
 #   export CRYPTOKEN="your-encryption-key"  # Only if backup was encrypted
 #   ./restore_sensitive_datas
 #
-# Note: This script decrypts, shows contents, and automatically restores keys. Manual restoration required for other files.
+# Note: This script decrypts, shows contents, automatically restores keys, configures Git, and provides manual restoration instructions for other files.
 # =============================================================================
 
 # Configuration Section
@@ -218,6 +219,34 @@ if tar -tf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz | grep -q "gpg
     fi
 else
     echo "✓ No GPG keys found in backup"
+fi
+
+# Configure Git with restored keys
+echo "Configuring Git with restored keys..."
+cd "$PROJECT_ROOT"  # Ensure we're in the git repository
+
+# Configure SSH for Git
+if [ -n "$SSH_KEY_FILENAME" ] && [ -f "$HOME/.ssh/$SSH_KEY_FILENAME" ]; then
+    CURRENT_SSH_CMD=$(git config --local core.sshCommand 2>/dev/null)
+    DESIRED_SSH_CMD="ssh -i $HOME/.ssh/$SSH_KEY_FILENAME -o IdentitiesOnly=yes"
+    if [ "$CURRENT_SSH_CMD" != "$DESIRED_SSH_CMD" ]; then
+        git config --local core.sshCommand "$DESIRED_SSH_CMD"
+        echo "✓ Configured Git SSH command: $DESIRED_SSH_CMD"
+    else
+        echo "✓ Git SSH command already correctly configured"
+    fi
+fi
+
+# Configure GPG for Git
+if [ -n "$GPG_KEY_ID" ] && gpg --list-keys "$GPG_KEY_ID" >/dev/null 2>&1; then
+    CURRENT_GPG_KEY=$(git config --local user.signingkey 2>/dev/null)
+    if [ "$CURRENT_GPG_KEY" != "$GPG_KEY_ID" ]; then
+        git config --local user.signingkey "$GPG_KEY_ID"
+        git config --local commit.gpgsign true
+        echo "✓ Configured Git GPG signing key: $GPG_KEY_ID"
+    else
+        echo "✓ Git GPG signing key already correctly configured"
+    fi
 fi
 
 echo "=================================================================================="

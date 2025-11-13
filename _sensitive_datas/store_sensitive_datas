@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # =============================================================================
-# Secure Backup Script for Sensitive Data version 2.4
+# Secure Backup Script for Sensitive Data version 2.5
 # =============================================================================
 #
 # This script creates an encrypted backup of sensitive project files including:

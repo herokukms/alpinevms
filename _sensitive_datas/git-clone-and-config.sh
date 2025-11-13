@@ -19,6 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# =============================================================================
+# Git Clone and Configure Script version 2.5
+# =============================================================================
+#
 # Generalized script to clone a Git repository with a specific SSH key and configure GPG signing for commits.
 # Usage: ./clone_and_config.sh <repo_url> <ssh_key_path> <gpg_key_id>
 # Example: ./clone_and_config.sh git@github.com:user/repo.git ~/.ssh/id_ed25519_key ABCDEF1234567890ABCDEF1234567890ABCD
