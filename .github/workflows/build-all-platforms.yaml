@@ -55,11 +55,31 @@ jobs:
         # Use absolute path for output file
         $outputPath = Join-Path $PWD "src/defaultkmsdata.c"
         Write-Host "Output path: $outputPath"
+        Write-Host "Current directory before cd: $PWD"
         cd LicenseManager/bin/Release/x64
-        ./LicenseManager.exe --export-vlmcsd $outputPath
+        Write-Host "Current directory after cd: $PWD"
+        Write-Host "Running: ./LicenseManager.exe --export-vlmcsd $outputPath"
+        # Capture both stdout and stderr
+        $process = Start-Process -FilePath "./LicenseManager.exe" -ArgumentList "--export-vlmcsd", $outputPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "stdout.txt" -RedirectStandardError "stderr.txt"
+        Write-Host "Exit code: $($process.ExitCode)"
+        if (Test-Path "stdout.txt") {
+          Write-Host "STDOUT:"
+          Get-Content "stdout.txt"
+        }
+        if (Test-Path "stderr.txt") {
+          Write-Host "STDERR:"
+          Get-Content "stderr.txt"
+        }
         # Verify the file was created
         if (!(Test-Path $outputPath)) {
           Write-Error "defaultkmsdata.c was not created by LicenseManager.exe at path: $outputPath"
+          # List files in src directory to see what's there
+          Write-Host "Contents of src directory:"
+          if (Test-Path src) {
+            Get-ChildItem src -Force
+          } else {
+            Write-Host "src directory does not exist"
+          }
           exit 1
         }
         Write-Host "Successfully created $outputPath"
