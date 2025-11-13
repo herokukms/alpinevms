@@ -36,6 +36,11 @@ jobs:
       run: pwsh ./modify-xml.ps1
     - name: Build LicenseManager
       run: msbuild "LicenseManager/License Manager.csproj" /p:Configuration=Release /p:Platform=x64
+    - name: Upload LicenseManager artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: license-manager-exe
+        path: LicenseManager/bin/Release/x64/LicenseManager.exe
     - name: Extract KMS data
       run: |
         # Verify LicenseManager.exe exists
@@ -83,11 +88,6 @@ jobs:
       with:
         name: kms-data-updated
         path: src/kmsdata-full.c
-    - name: Upload LicenseManager artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: license-manager-exe
-        path: LicenseManager/bin/Release/x64/LicenseManager.exe
 
   build-windows-vs:
     runs-on: windows-latest
